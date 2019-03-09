@@ -41,7 +41,7 @@ public class StarPatternGenerator {
      *
      */
     public static List<List<Triple>> generateMultipleStarPatternGraphs() {
-        int numNodes = (int)Math.pow(2, 18); // should be 2^k for some k
+        int numNodes = (int) Math.pow(2, 12); // should be 2^k for some k
 
         int numEdges = numNodes; // must be >= numNodes
 

@@ -1,4 +1,5 @@
 import compressionHandling.CompressionResult;
+import compressionHandling.GraphRePairStarter;
 import compressionHandling.HDTStarter;
 import org.apache.jena.ext.com.google.common.io.Files;
 
@@ -13,7 +14,8 @@ public class StarGraphEvaluator {
 
     private static void evaluateStarGraphs() {
         List<List<Triple>> graphs = StarPatternGenerator.generateMultipleStarPatternGraphs();
-        List<CompressionResult> compressionResults = new ArrayList<CompressionResult>();
+        List<CompressionResult> compressionResultsHDT = new ArrayList<CompressionResult>();
+        List<CompressionResult> compressionResultsGPR = new ArrayList<CompressionResult>();
 
         int minSize = Integer.MAX_VALUE;
         for(List<Triple> graph:graphs){
@@ -45,15 +47,27 @@ public class StarGraphEvaluator {
             }
 
             HDTStarter hdtStarter = new HDTStarter();
-            compressionResults.add(hdtStarter.compress(filePath));
+            compressionResultsHDT.add(hdtStarter.compress(filePath));
+
+            GraphRePairStarter graphRePairStarter = new GraphRePairStarter();
+            compressionResultsGPR.add(graphRePairStarter.compress(filePath));
         }
 
-        for (CompressionResult compressionResult : compressionResults) {
+        System.out.println("\n\n\n\n-----------------------");
+        System.out.println("HDT compression ratios:");
+        for (CompressionResult compressionResult : compressionResultsHDT) {
             double compressionRatio = compressionResult.getCompressionRatio();
             compressionRatio = Math.floor(compressionRatio * 100000) / 100000;
             System.out.print( compressionRatio+", ");
         }
-        System.out.println();
+
+        System.out.println("\n\n GPR compression ratios:");
+        for (CompressionResult compressionResult : compressionResultsGPR) {
+            double compressionRatio = compressionResult.getCompressionRatio() * 10000;
+            compressionRatio = Math.floor(compressionRatio * 10000) / 10000;
+            System.out.print(compressionRatio + ", ");
+        }
+
 
 //        for (CompressionResult compressionResult : compressionResults) {
 //            System.out.print(compressionResult.getOriginalSize() + ", ");
