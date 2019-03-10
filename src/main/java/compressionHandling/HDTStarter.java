@@ -25,6 +25,9 @@ public class HDTStarter implements CompressionStarter {
         long compressionTime = -1;
         try {
             outputFile = new File(hdtOutput);
+            if (outputFile.exists()) {
+                outputFile.delete();
+            }
             outputFile.createNewFile();
 
             compressionTime = System.currentTimeMillis();
@@ -36,8 +39,9 @@ public class HDTStarter implements CompressionStarter {
                     new HDTSpecification(),   // HDT Options
                     null              // Progress Listener
             );
+
             hdt.saveToHDT(hdtOutput, null);
-            compressionTime = System.currentTimeMillis()-compressionTime;
+            compressionTime = System.currentTimeMillis() - compressionTime;
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -50,14 +54,14 @@ public class HDTStarter implements CompressionStarter {
         //header.insert("myResource1", "property" , "value");
 
 
-        return new CompressionResult(inputFile.length(), outputFile.length(),compressionTime,-1);
+        return new CompressionResult(inputFile.length(), outputFile.length(), compressionTime, -1);
     }
 
     public CompressionResult decompress(String filePath) {
         return null;
     }
 
-    public static void main(String[] ag){
+    public static void main(String[] ag) {
         System.out.println(new HDTStarter().compress("/Users/philipfrerk/Documents/RDF_data/Semantic_web_dog_food/eswc-2006-complete.ttl"));
     }
 }
