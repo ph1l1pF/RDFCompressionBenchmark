@@ -1,10 +1,12 @@
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class StarPatternGenerator {
 
     /**
-     * @param numEdges number of edges (labels are irrelevant)
+     * @param numEdges                 number of edges (labels are irrelevant)
      * @param numParticipatingSubjects Edges verteilen sich gleichmäßig auf so viele Subjekte
      * @param numParticipatingObjects  Edges verteilen sich gleichmäßig auf so viele Objekte
      */
@@ -14,26 +16,24 @@ public class StarPatternGenerator {
 
         List<Triple> triples = new ArrayList<Triple>();
 
-        int currentObj = 0;
-        int countForCurrentObj = 0; // must always be <= edgesPerObject
+        Map<Integer, Integer> mapObjectToCount = new HashMap<Integer, Integer>();
+        for (int i = 0; i < numParticipatingObjects; i++) {
+            mapObjectToCount.put(i, 0);
+        }
 
         for (int currentSubj = 0; currentSubj < numParticipatingSubjects; currentSubj++) {
             for (int countForCurrSubj = 0; countForCurrSubj < edgesPerSubject; countForCurrSubj++) {
-                if (countForCurrentObj < edgesPerObject) {
-                    // new edge from currentSubject to currentObject
-                    triples.add(new Triple(String.valueOf(currentSubj), "-", String.valueOf(currentObj)));
-                    countForCurrentObj++;
-                } else {
-                    // current object has already enough ingoing edges, so go to next object
-                    currentObj++;
-                    countForCurrentObj = 0;
-
-                    // but we still want the same subject in next iteration
-//                    countForCurrSubj--;
+                for (int currentObject = 0; currentObject < numParticipatingObjects; currentObject++) {
+                    if (mapObjectToCount.get(currentObject) < edgesPerObject) {
+                        Triple triple = new Triple(String.valueOf(currentSubj), "-", String.valueOf(currentObject));
+                        if (!triples.contains(triple)) {
+                            triples.add(triple);
+                            mapObjectToCount.put(currentObject, mapObjectToCount.get(currentObject) + 1);
+                        }
+                    }
                 }
             }
         }
-
         return triples;
     }
 
@@ -43,21 +43,15 @@ public class StarPatternGenerator {
     public static List<List<Triple>> generateMultipleStarPatternGraphs() {
         int numNodes = (int) Math.pow(2, 12); // should be 2^k for some k
 
-        int numEdges = numNodes; // must be >= numNodes
+        int numEdges = numNodes / 2; // must be >= numNodes
 
         List<List<Triple>> graphs = new ArrayList<List<Triple>>();
 
-        int j = numNodes/2;
-        for (int i = 1; i <= numNodes/2; i *= 2) {
+        int j = numNodes / 2;
+        for (int i = 1; i <= numNodes / 2; i *= 2) {
             graphs.add(generateStarGraph(numEdges, i, j));
             j /= 2;
         }
         return graphs;
-    }
-
-
-
-    public static void main(String[] args) {
-        generateMultipleStarPatternGraphs();
     }
 }

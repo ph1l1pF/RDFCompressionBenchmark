@@ -12,27 +12,17 @@ import java.util.Random;
 
 public class StarGraphEvaluator {
 
+    private static final String HTTP_PREFIX = "http://myurl/";
+
     private static void evaluateStarGraphs() {
         List<List<Triple>> graphs = StarPatternGenerator.generateMultipleStarPatternGraphs();
         List<CompressionResult> compressionResultsHDT = new ArrayList<CompressionResult>();
         List<CompressionResult> compressionResultsGPR = new ArrayList<CompressionResult>();
 
-        int minSize = Integer.MAX_VALUE;
-        for(List<Triple> graph:graphs){
-            if(graph.size()<minSize){
-                minSize=graph.size();
-            }
-        }
-        for(List<Triple> graph:graphs){
-            while(graph.size()>minSize){
-                graph.remove(new Random().nextInt(minSize));
-            }
-        }
-
         for (List<Triple> graph : graphs) {
             StringBuilder sb = new StringBuilder();
             for (Triple triple : graph) {
-                sb.append("<" + triple.getSubject() + "> <" + triple.getPredicate() + "> <" + triple.getObject() + "> .\n");
+                sb.append("<" + HTTP_PREFIX + triple.getSubject() + "> <" + HTTP_PREFIX + triple.getPredicate() + "> <" + HTTP_PREFIX + triple.getObject() + "> .\n");
             }
 
             String filePath = "file.ttl";
