@@ -54,7 +54,7 @@ public class HDTStarter implements CompressionStarter {
         //header.insert("myResource1", "property" , "value");
 
 
-        return new CompressionResult(inputFile.length(), outputFile.length(), compressionTime, -1);
+        return new CompressionResult(inputFile.length(), outputFile.length(), compressionTime, -1, inputFile.getAbsolutePath());
     }
 
     public CompressionResult decompress(String filePath) {

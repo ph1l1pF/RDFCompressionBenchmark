@@ -1,3 +1,4 @@
+package GraphGeneration;
 
 import compressionHandling.GraphRePairStarter;
 

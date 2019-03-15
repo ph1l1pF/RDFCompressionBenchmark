@@ -1,3 +1,7 @@
+package GraphGeneration;
+
+import Util.Triple;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -45,7 +49,7 @@ public class StarPatternGenerator {
 
         int numEdges = numNodes / 2; // must be >= numNodes/2
 
-        List<List<Triple>> graphs = new ArrayList<List<Triple>>();
+        List<List<Triple>> graphs = new ArrayList<>();
 
         int j = numNodes / 2;
         for (int i = 1; i <= numNodes / 2; i *= 2) {

@@ -1,3 +1,5 @@
+package Util;
+
 import org.apache.jena.ext.com.google.common.io.Files;
 import org.apache.jena.graph.Node_Blank;
 import org.apache.jena.graph.Node_Literal;
@@ -16,13 +18,21 @@ public class RDFTurtleConverter {
 
     public static ExtendedIterator<Triple> readTriplesFromRDFFile(String filePath){
         Model modelDefault = ModelFactory.createDefaultModel();
-        Model modelConcrete = modelDefault.read(filePath);
+        Model modelConcrete = null;
+        try {
+            modelConcrete = modelDefault.read(filePath);
+        } catch (Exception e) {
+            return null;
+        }
         return modelConcrete.getGraph().find();
     }
 
-    public static void convertAndStoreAsTurtleFile(String filePath) throws IOException {
+    public static File convertAndStoreAsTurtleFile(String filePath) throws IOException {
 
         ExtendedIterator<Triple> tripleExtendedIterator = readTriplesFromRDFFile(filePath);
+        if (tripleExtendedIterator == null) {
+            return null;
+        }
         StringBuilder lines = new StringBuilder();
         while (tripleExtendedIterator.hasNext()) {
             Triple triple = tripleExtendedIterator.next();
@@ -30,10 +40,14 @@ public class RDFTurtleConverter {
         }
 
 
-        Files.write(lines.toString().getBytes(), new File(filePath+"_"));
+        File ttlFile = new File(filePath + "_");
+        if (ttlFile.exists()) {
+            ttlFile.delete();
+        }
+        Files.write(lines.toString().getBytes(), ttlFile);
 
+        return ttlFile;
     }
-
 
 
     public static String getLabel(org.apache.jena.graph.Node node){

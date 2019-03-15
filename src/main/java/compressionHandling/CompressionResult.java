@@ -1,14 +1,17 @@
 package compressionHandling;
 
-public class CompressionResult {
+public class CompressionResult implements Comparable {
 
     private long originalSize, compressedSize,compressionTime, decompressionTime;
 
-    public CompressionResult(long originalSize, long compressedSize, long compressionTime, long decompressionTime) {
+    private String fileName;
+
+    public CompressionResult(long originalSize, long compressedSize, long compressionTime, long decompressionTime, String fileName) {
         this.originalSize = originalSize;
         this.compressedSize = compressedSize;
         this.compressionTime = compressionTime;
         this.decompressionTime = decompressionTime;
+        this.fileName = fileName;
     }
 
     @Override
@@ -38,5 +41,22 @@ public class CompressionResult {
 
     public long getDecompressionTime() {
         return decompressionTime;
+    }
+
+    public String getFileName() {
+        return fileName;
+    }
+
+    @Override
+    public int compareTo(Object o) {
+        CompressionResult result = (CompressionResult) o;
+        if (getCompressionRatio() == result.getCompressionRatio()) {
+            return 0;
+        }
+        if (getCompressionRatio() < result.getCompressionRatio()) {
+            return -1;
+        } else {
+            return 1;
+        }
     }
 }

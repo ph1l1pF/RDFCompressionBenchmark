@@ -10,9 +10,11 @@ public class GraphRePairStarter implements CompressionStarter {
 
         // remove old compression output
         File directoryOutput = new File("output_" + filePath);
-        for (File file : directoryOutput.listFiles()) {
-            if (file.isFile()) {
-                file.delete();
+        if (directoryOutput.exists()) {
+            for (File file : directoryOutput.listFiles()) {
+                if (file.isFile()) {
+                    file.delete();
+                }
             }
         }
 
@@ -31,7 +33,7 @@ public class GraphRePairStarter implements CompressionStarter {
             }
         }
 
-        return new CompressionResult(originalSize, compressedSize, compressionTime, -1);
+        return new CompressionResult(originalSize, compressedSize, compressionTime, -1, inputFile.getAbsolutePath());
     }
 
     public CompressionResult decompress(String file){

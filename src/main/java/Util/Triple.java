@@ -1,7 +1,9 @@
-public class Triple {
-    String subject, predicate, object;
+package Util;
 
-    Triple(String subject, String predicate, String object) {
+public class Triple {
+    private String subject, predicate, object;
+
+    public Triple(String subject, String predicate, String object) {
         this.subject = subject;
         this.predicate = predicate;
         this.object = object;
@@ -28,5 +30,9 @@ public class Triple {
 
     public String getObject() {
         return object;
+    }
+
+    public void setPredicate(String predicate) {
+        this.predicate = predicate;
     }
 }
