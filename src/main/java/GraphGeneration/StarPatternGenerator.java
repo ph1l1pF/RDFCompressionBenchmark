@@ -2,10 +2,7 @@ package GraphGeneration;
 
 import Util.Triple;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class StarPatternGenerator {
 
@@ -18,9 +15,9 @@ public class StarPatternGenerator {
         int edgesPerSubject = numEdges / numParticipatingSubjects;
         int edgesPerObject = numEdges / numParticipatingObjects;
 
-        List<Triple> triples = new ArrayList<Triple>();
+        List<Triple> triples = new ArrayList<>();
 
-        Map<Integer, Integer> mapObjectToCount = new HashMap<Integer, Integer>();
+        Map<Integer, Integer> mapObjectToCount = new HashMap<>();
         for (int i = 0; i < numParticipatingObjects; i++) {
             mapObjectToCount.put(i, 0);
         }
@@ -42,8 +39,41 @@ public class StarPatternGenerator {
     }
 
     /**
-     *
+     * Each subject is connected to each object, so the number of edges will change!
+     * This seems to have an impact on compr. ratio!
+     * @param numNodes
+     * @param numSubjects
+     * @return
      */
+    private static List<Triple> generateStarGraphWithFixedNumberOfNodes(int numNodes, int numSubjects) {
+        // the number of objects follows
+        int numObjects = numNodes - numSubjects;
+        int numEdges = Math.max(numObjects, numObjects);
+        List<Triple> triples = new ArrayList<>();
+
+        // every subject is connected to every object
+        for (int i = 0; i < numSubjects; i++) {
+            for (int k = 0; k < numObjects; k++) {
+                Triple triple = new Triple(String.valueOf(i), "-", String.valueOf(k + numSubjects));
+                triples.add(triple);
+            }
+        }
+        return triples;
+    }
+
+    public static List<List<Triple>> generateMultipleStarPatternGraphsWithFixedNoOfNodes() {
+        int steps = 4;
+        int numNodes = 20 * steps;
+
+
+        List<List<Triple>> graphs = new ArrayList<>();
+
+        for (int numSubjects = 1; numSubjects <= numNodes; numSubjects += steps) {
+            graphs.add(generateStarGraphWithFixedNumberOfNodes(numNodes, numSubjects));
+        }
+        return graphs;
+    }
+
     public static List<List<Triple>> generateMultipleStarPatternGraphs() {
         int numNodes = (int) Math.pow(2, 12); // should be 2^k for some k
 
@@ -58,4 +88,5 @@ public class StarPatternGenerator {
         }
         return graphs;
     }
+
 }
