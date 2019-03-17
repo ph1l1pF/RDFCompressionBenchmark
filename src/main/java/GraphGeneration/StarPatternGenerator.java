@@ -1,61 +1,104 @@
 package GraphGeneration;
 
+import Util.MathUtil;
 import Util.Triple;
+import com.hp.hpl.jena.sparql.sse.builders.BuilderOp;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class StarPatternGenerator {
 
-    /**
-     * @param numEdges                 number of edges (labels are irrelevant)
-     * @param numParticipatingSubjects Edges verteilen sich gleichmäßig auf so viele Subjekte
-     * @param numParticipatingObjects  Edges verteilen sich gleichmäßig auf so viele Objekte
-     */
-    private static List<Triple> generateStarGraph(int numEdges, int numParticipatingSubjects, int numParticipatingObjects) {
-        int edgesPerSubject = numEdges / numParticipatingSubjects;
-        int edgesPerObject = numEdges / numParticipatingObjects;
 
-        List<Triple> triples = new ArrayList<Triple>();
+    private static List<Triple> generateStarGraphWithFixedSizeNew2(int numEdges, int numNodes, int numSubjects) {
+        int numObjects = numNodes - numSubjects;
 
-        Map<Integer, Integer> mapObjectToCount = new HashMap<Integer, Integer>();
-        for (int i = 0; i < numParticipatingObjects; i++) {
-            mapObjectToCount.put(i, 0);
+        int edgesPerSubj = numEdges / numSubjects;
+        int edgesPerObj = numEdges / numObjects;
+
+        List<Integer> availableSubj = new ArrayList<>();
+        for (int i = 0; i < numSubjects; i++) {
+            for (int k = 0; k < edgesPerSubj; k++) {
+                availableSubj.add(i);
+            }
+
         }
 
-        for (int currentSubj = 0; currentSubj < numParticipatingSubjects; currentSubj++) {
-            for (int countForCurrSubj = 0; countForCurrSubj < edgesPerSubject; countForCurrSubj++) {
-                for (int currentObject = 0; currentObject < numParticipatingObjects; currentObject++) {
-                    if (mapObjectToCount.get(currentObject) < edgesPerObject) {
-                        Triple triple = new Triple(String.valueOf(currentSubj), "-", String.valueOf(currentObject));
-                        if (!triples.contains(triple)) {
-                            triples.add(triple);
-                            mapObjectToCount.put(currentObject, mapObjectToCount.get(currentObject) + 1);
-                        }
-                    }
-                }
+        List<Integer> availableObj = new ArrayList<>();
+        for (int i = 0; i < numObjects; i++) {
+            for (int k = 0; k < edgesPerObj; k++) {
+                availableObj.add(i + numSubjects);
             }
         }
+
+        List<Triple> triples = new ArrayList<>();
+        Random random = new Random();
+        while (!availableSubj.isEmpty() && !availableObj.isEmpty()) {
+            int subj = availableSubj.get(random.nextInt(availableSubj.size()));
+            int obj = availableObj.get(random.nextInt(availableObj.size()));
+
+            Triple triple = new Triple(String.valueOf(subj), "-", String.valueOf(obj));
+            if (!triples.contains(triple)) {
+                triples.add(triple);
+                removeIntFromList(availableSubj, subj);
+                removeIntFromList(availableObj, obj);
+            }
+
+        }
+
+        while (triples.size() < numEdges) {
+            int subj = random.nextInt(numSubjects);
+            int obj = getRandomNumberInRange(numSubjects, numNodes - 1);
+            Triple triple = new Triple(String.valueOf(subj), "-", String.valueOf(obj));
+            if (!triples.contains(triple)) {
+                triples.add(triple);
+            }
+
+        }
+
+
         return triples;
+
+    }
+
+    private static int getRandomNumberInRange(int min, int max) {
+
+        if (min >= max) {
+            throw new IllegalArgumentException("max must be greater than min");
+        }
+
+        Random r = new Random();
+        return r.nextInt((max - min) + 1) + min;
+    }
+
+    private static void removeIntFromList(List<Integer> list, int intToRemove) {
+        for (int i = 0; i < list.size(); i++) {
+            if (list.get(i) == intToRemove) {
+                list.remove(i);
+                break;
+            }
+        }
     }
 
     /**
      *
      */
-    public static List<List<Triple>> generateMultipleStarPatternGraphs() {
-        int numNodes = (int) Math.pow(2, 12); // should be 2^k for some k
+    public static List<List<Triple>> generateMultipleStarPatternGraphsWithFixedSize() {
+        int steps = 4;
+        int numNodes = 50 * steps;
 
-        int numEdges = numNodes / 2; // must be >= numNodes/2
+        // compute numEdges, has to be the max-size, that one of the sets (subjects, objects) can reach
+        int numEdges = numNodes - 1;
 
         List<List<Triple>> graphs = new ArrayList<>();
 
-        int j = numNodes / 2;
-        for (int i = 1; i <= numNodes / 2; i *= 2) {
-            graphs.add(generateStarGraph(numEdges, i, j));
-            j /= 2;
+        for (int numSubjects = 1; numSubjects <= numNodes; numSubjects += steps) {
+            graphs.add(generateStarGraphWithFixedSizeNew2(numEdges, numNodes, numSubjects));
         }
         return graphs;
+    }
+
+    public static void main(String[] agr) {
+        generateMultipleStarPatternGraphsWithFixedSize();
+        System.out.println();
     }
 }

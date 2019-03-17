@@ -21,13 +21,14 @@ public class StarGraphEvaluator {
     private static final String HTTP_PREFIX = "http://myurl/";
 
     private static void evaluateStarGraphs() {
-        List<List<Triple>> graphs = StarPatternGenerator.generateMultipleStarPatternGraphs();
+        List<List<Triple>> graphs = StarPatternGenerator.generateMultipleStarPatternGraphsWithFixedSize();
 
         for (List<Triple> graph : graphs) {
             distributePredicates(graph);
         }
+
         List<CompressionResult> compressionResultsHDT = new ArrayList<>();
-        List<CompressionResult> compressionResultsGPR = new ArrayList<>();
+        List<CompressionResult> compressionResultsGRP = new ArrayList<>();
 
         for (List<Triple> graph : graphs) {
 
@@ -38,10 +39,17 @@ public class StarGraphEvaluator {
             compressionResultsHDT.add(hdtStarter.compress(filePath));
 
             GraphRePairStarter graphRePairStarter = new GraphRePairStarter();
-            compressionResultsGPR.add(graphRePairStarter.compress(filePath));
+            compressionResultsGRP.add(graphRePairStarter.compress(filePath));
         }
 
         System.out.println("\n\n\n\n-----------------------");
+
+        for (List<Triple> graph : graphs) {
+            distributePredicates(graph);
+            System.out.print(graph.size() + ", ");
+        }
+        System.out.println();
+
         System.out.println("HDT compression ratios:");
         for (CompressionResult compressionResult : compressionResultsHDT) {
             double compressionRatio = compressionResult.getCompressionRatio();
@@ -49,9 +57,9 @@ public class StarGraphEvaluator {
             System.out.print( compressionRatio+", ");
         }
 
-        System.out.println("\n\n GPR compression ratios:");
-        for (CompressionResult compressionResult : compressionResultsGPR) {
-            double compressionRatio = compressionResult.getCompressionRatio() * 10000;
+        System.out.println("\n\n GRP compression ratios:");
+        for (CompressionResult compressionResult : compressionResultsGRP) {
+            double compressionRatio = compressionResult.getCompressionRatio();
             compressionRatio = Math.floor(compressionRatio * 10000) / 10000;
             System.out.print(compressionRatio + ", ");
         }
@@ -77,42 +85,12 @@ public class StarGraphEvaluator {
         }
     }
 
-    private static void testRandomStars() {
-        int numTriples = 1000;
-        int cores = 400;
 
-        List<Triple> triples = new ArrayList<>();
-        for (int i = 0; i < numTriples; i++) {
-            int core = new Random().nextInt(cores);
-            int leaf = new Random().nextInt(10000);
-
-            Triple triple;
-            if (true) {
-                triple = new Triple(String.valueOf(core), "-", String.valueOf(leaf));
-            } else {
-                triple = new Triple(String.valueOf(leaf), "-", String.valueOf(core));
-            }
-            triples.add(triple);
-        }
-        String filePath = "random.ttl";
-        writeTriplesToFile(triples, filePath);
-
-        HDTStarter hdtStarter = new HDTStarter();
-        CompressionResult resultHDT = hdtStarter.compress(filePath);
-
-        GraphRePairStarter graphRePairStarter = new GraphRePairStarter();
-        CompressionResult resultGPR = graphRePairStarter.compress(filePath);
-
-        System.out.println("HDT: " + resultHDT.getCompressionRatio());
-        System.out.println("GPR: " + resultGPR.getCompressionRatio());
-
-
-    }
 
     private static void distributePredicates(List<Triple> graph) {
         PredicateDistributor predicateDistributor = new RandomPredicateDistributor();
         List<String> predicates = new ArrayList<>();
-        for (int i = 0; i < 3; i++) {
+        for (int i = 0; i < 1; i++) {
             predicates.add(String.valueOf(i));
         }
         predicateDistributor.distributePredicates(graph, predicates);
