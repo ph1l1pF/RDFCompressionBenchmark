@@ -1,6 +1,7 @@
 package Util;
 
 public class Triple {
+
     private String subject, predicate, object;
 
     public Triple(String subject, String predicate, String object) {

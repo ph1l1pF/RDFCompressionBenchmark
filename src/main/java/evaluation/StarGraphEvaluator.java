@@ -36,37 +36,30 @@ public class StarGraphEvaluator {
             writeTriplesToFile(graph, filePath);
 
             HDTStarter hdtStarter = new HDTStarter();
-            compressionResultsHDT.add(hdtStarter.compress(filePath));
+            compressionResultsHDT.add(hdtStarter.compress(filePath, "fileCompressedWithHDT.hdt", true));
 
             GraphRePairStarter graphRePairStarter = new GraphRePairStarter();
-            compressionResultsGRP.add(graphRePairStarter.compress(filePath));
+            compressionResultsGRP.add(graphRePairStarter.compress(filePath, null, true));
         }
 
+        printResults(compressionResultsHDT, compressionResultsGRP);
+    }
+
+    private static void printResults(List<CompressionResult> compressionResultsHDT, List<CompressionResult> compressionResultsGRP) {
         System.out.println("\n\n\n\n-----------------------");
-
-        for (List<Triple> graph : graphs) {
-            distributePredicates(graph);
-            System.out.print(graph.size() + ", ");
-        }
-        System.out.println();
 
         System.out.println("HDT compression ratios:");
         for (CompressionResult compressionResult : compressionResultsHDT) {
-            double compressionRatio = compressionResult.getCompressionRatio();
-            compressionRatio = Math.floor(compressionRatio * 100000) / 100000;
-            System.out.print( compressionRatio+", ");
+            System.out.print(compressionResult.getCompressionRatio() + ", ");
         }
 
         System.out.println("\n\n GRP compression ratios:");
         for (CompressionResult compressionResult : compressionResultsGRP) {
-            double compressionRatio = compressionResult.getCompressionRatio();
-            compressionRatio = Math.floor(compressionRatio * 10000) / 10000;
-            System.out.print(compressionRatio + ", ");
+            System.out.print(compressionResult.getCompressionRatio() + ", ");
         }
-//        compressionResultsGPR.stream().mapToDouble(c -> c.getCompressionRatio()).summaryStatistics().
 
-        // immer gleiche anzahl an knoten, anzahl kanten ergibt sich dann
     }
+
 
     private static void writeTriplesToFile(List<Triple> triples, String filePath) {
         StringBuilder sb = new StringBuilder();
@@ -90,7 +83,7 @@ public class StarGraphEvaluator {
     private static void distributePredicates(List<Triple> graph) {
         PredicateDistributor predicateDistributor = new RandomPredicateDistributor();
         List<String> predicates = new ArrayList<>();
-        for (int i = 0; i < 1; i++) {
+        for (int i = 0; i < 1000; i++) {
             predicates.add(String.valueOf(i));
         }
         predicateDistributor.distributePredicates(graph, predicates);
@@ -98,6 +91,5 @@ public class StarGraphEvaluator {
 
     public static void main(String[] args) {
         evaluateStarGraphs();
-//        testRandomStars();
     }
 }

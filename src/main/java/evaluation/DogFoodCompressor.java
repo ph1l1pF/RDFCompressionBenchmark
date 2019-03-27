@@ -2,6 +2,8 @@ package evaluation;
 
 import Util.RDFTurtleConverter;
 import compressionHandling.CompressionResult;
+import compressionHandling.CompressionStarter;
+import compressionHandling.GraphRePairStarter;
 import compressionHandling.HDTStarter;
 import org.apache.jena.base.Sys;
 
@@ -14,7 +16,8 @@ import java.util.List;
 public class DogFoodCompressor {
 
     public static void main(String[] args) {
-        File dir = new File("/Users/philipfrerk/Documents/RDF_data/www.scholarlydata.org");
+        File dir = new File("/Users/philipfrerk/Documents/RDF_data/dbpedia");
+
 
 
         List<File> files = new ArrayList<>();
@@ -25,10 +28,10 @@ public class DogFoodCompressor {
         while (!queue.isEmpty() && files.size() <= bound) {
             File currentDir = queue.remove(0);
             for (File file : currentDir.listFiles()) {
-                if (file.getAbsolutePath().endsWith(".rdf")) {
+                if (file.getAbsolutePath().endsWith("bz2")) {
                     try {
                         files.add(RDFTurtleConverter.convertAndStoreAsTurtleFile(file.getAbsolutePath()));
-                    } catch (IOException e) {
+                    } catch (Exception e) {
                         e.printStackTrace();
                     }
                 } else if (file.isDirectory()) {
@@ -38,17 +41,18 @@ public class DogFoodCompressor {
         }
 
         List<CompressionResult> results = new ArrayList<>();
-        HDTStarter hdtStarter = new HDTStarter();
+        CompressionStarter hdtStarter = new GraphRePairStarter();
 
         for (File file : files) {
             if (file != null)
-                results.add(hdtStarter.compress(file.getAbsolutePath()));
+                results.add(hdtStarter.compress(file.getAbsolutePath(), file.getName() + ".hdt", true));
         }
 
-        Collections.sort(results);
+//        Collections.sort(results);
 
         for (CompressionResult result : results) {
-            System.out.print(result.getOriginalSize() + ", ");
+            if (result != null)
+                System.out.print(result.getCompressionRatio() + ", ");
         }
     }
 }

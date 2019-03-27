@@ -4,7 +4,7 @@ import compressionHandling.CompressionResult;
 
 public interface CompressionStarter {
 
-    public CompressionResult compress(String filePath);
+    CompressionResult compress(String filePath, String outputName, boolean addDictionarySizeToCompressedSize);
 
-    public CompressionResult decompress(String filePath);
+    CompressionResult decompress(String filePath);
 }
