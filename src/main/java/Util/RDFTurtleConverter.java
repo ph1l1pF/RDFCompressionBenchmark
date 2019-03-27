@@ -1,5 +1,6 @@
 package Util;
 
+import compressionHandling.HDTStarter;
 import org.apache.jena.ext.com.google.common.io.Files;
 import org.apache.jena.graph.Node_Blank;
 import org.apache.jena.graph.Node_Literal;
@@ -8,8 +9,9 @@ import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.util.iterator.ExtendedIterator;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class RDFTurtleConverter {
 
@@ -27,24 +29,59 @@ public class RDFTurtleConverter {
         return modelConcrete.getGraph().find();
     }
 
-    public static File convertAndStoreAsTurtleFile(String filePath) throws IOException {
+    public static File convertAndStoreAsTurtleFile(String filePath) {
 
         ExtendedIterator<Triple> tripleExtendedIterator = readTriplesFromRDFFile(filePath);
         if (tripleExtendedIterator == null) {
             return null;
         }
-        StringBuilder lines = new StringBuilder();
+        List<String> lines = new ArrayList<>();
+        StringBuilder stringBuilder = new StringBuilder();
+        int counter = 0;
+
         while (tripleExtendedIterator.hasNext()) {
+
+            if (counter > 10000) {
+                counter = 0;
+                lines.add(stringBuilder.toString());
+                stringBuilder = new StringBuilder();
+            }
+            counter++;
+
             Triple triple = tripleExtendedIterator.next();
-            lines.append("<"+getLabel(triple.getSubject()) + "> <" + getLabel(triple.getPredicate()) + "> <" + getLabel(triple.getObject()) + "> .\n");
+            stringBuilder.append("<" + getLabel(triple.getSubject()) + "> <" + getLabel(triple.getPredicate()) + "> <" + getLabel(triple.getObject()) + "> .\n");
         }
 
+        System.out.println("done");
 
         File ttlFile = new File(filePath + "_");
         if (ttlFile.exists()) {
             ttlFile.delete();
         }
-        Files.write(lines.toString().getBytes(), ttlFile);
+
+        BufferedWriter bw = null;
+        FileWriter fw = null;
+
+        try {
+            fw = new FileWriter(ttlFile);
+            bw = new BufferedWriter(fw);
+            for (String line : lines) {
+                bw.write(line + "\n");
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (bw != null)
+                    bw.close();
+                if (fw != null)
+                    fw.close();
+
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+        }
 
         return ttlFile;
     }

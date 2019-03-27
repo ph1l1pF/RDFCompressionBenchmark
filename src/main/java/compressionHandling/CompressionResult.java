@@ -2,13 +2,14 @@ package compressionHandling;
 
 public class CompressionResult implements Comparable {
 
-    private long originalSize, compressedSize,compressionTime, decompressionTime;
+    private long originalSize, compressedSize, compressionDictionarySize, compressionTime, decompressionTime;
 
     private String fileName;
 
-    public CompressionResult(long originalSize, long compressedSize, long compressionTime, long decompressionTime, String fileName) {
+    public CompressionResult(long originalSize, long compressedSize, long compressionDictionarySize, long compressionTime, long decompressionTime, String fileName) {
         this.originalSize = originalSize;
         this.compressedSize = compressedSize;
+        this.compressionDictionarySize = compressionDictionarySize;
         this.compressionTime = compressionTime;
         this.decompressionTime = decompressionTime;
         this.fileName = fileName;
@@ -29,6 +30,10 @@ public class CompressionResult implements Comparable {
 
     public long getOriginalSize() {
         return originalSize;
+    }
+
+    public long getCompressionDictionarySize() {
+        return compressionDictionarySize;
     }
 
     public long getCompressedSize() {

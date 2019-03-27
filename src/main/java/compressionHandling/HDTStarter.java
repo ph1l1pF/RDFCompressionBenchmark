@@ -8,31 +8,44 @@ import org.rdfhdt.hdt.options.HDTSpecification;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 public class HDTStarter implements CompressionStarter {
 
-    public CompressionResult compress(String filePath) {
+    private final Map<String, String> mapSuffixToFormat = new HashMap<>();
+
+    public HDTStarter() {
+        final String NTRIPLES = "ntriples";
+        mapSuffixToFormat.put("ttl", NTRIPLES);
+        mapSuffixToFormat.put("nt", NTRIPLES);
+    }
+
+    public CompressionResult compress(String filePath, String outputName, boolean addDictionarySizeToCompressedSize) {
 
         String baseURI = "http://example.com/mydataset";
         String rdfInput = filePath;
-        String inputType = "ntriples";
-        String hdtOutput = "dataset.hdt";
+
+        String inputType = mapSuffixToFormat.get(getFileSuffix(filePath));
+
+        if (inputType == null) {
+            throw new IllegalArgumentException("Invalid format: " + getFileSuffix(filePath));
+        }
 
         File inputFile = new File(filePath);
         File outputFile = null;
 
-
         long compressionTime = -1;
+        HDT hdt = null;
         try {
-            outputFile = new File(hdtOutput);
+            outputFile = new File(outputName);
             if (outputFile.exists()) {
                 outputFile.delete();
             }
-            outputFile.createNewFile();
 
             compressionTime = System.currentTimeMillis();
 
-            HDT hdt = HDTManager.generateHDT(
+            hdt = HDTManager.generateHDT(
                     rdfInput,         // Input RDF File
                     baseURI,          // Base URI
                     RDFNotation.parse(inputType), // Input Type
@@ -40,7 +53,7 @@ public class HDTStarter implements CompressionStarter {
                     null              // Progress Listener
             );
 
-            hdt.saveToHDT(hdtOutput, null);
+            hdt.saveToHDT(outputName, null);
             compressionTime = System.currentTimeMillis() - compressionTime;
 
         } catch (IOException e) {
@@ -53,15 +66,21 @@ public class HDTStarter implements CompressionStarter {
         //Header header = hdt.getHeader();
         //header.insert("myResource1", "property" , "value");
 
+        long compressedSize = outputFile.length();
+        if (!addDictionarySizeToCompressedSize) {
+            compressedSize -= hdt.getDictionary().size();
+        }
 
-        return new CompressionResult(inputFile.length(), outputFile.length(), compressionTime, -1, inputFile.getAbsolutePath());
+        return new CompressionResult(inputFile.length(), compressedSize, hdt.getDictionary().size(), compressionTime, -1, inputFile.getAbsolutePath());
     }
+
+    private static String getFileSuffix(String filePath) {
+        String[] splitted = filePath.split("\\.");
+        return splitted[splitted.length - 1];
+    }
+
 
     public CompressionResult decompress(String filePath) {
         return null;
-    }
-
-    public static void main(String[] ag) {
-        System.out.println(new HDTStarter().compress("/Users/philipfrerk/Documents/RDF_data/Semantic_web_dog_food/eswc-2006-complete.ttl"));
     }
 }
