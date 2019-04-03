@@ -16,6 +16,10 @@ public class Triple {
         return subject.equals(triple.subject) && predicate.equals(triple.predicate) && object.equals(triple.object);
     }
 
+    public Triple deepCopy() {
+        return new Triple(new String(subject), new String(predicate), new String(object));
+    }
+
     @Override
     public String toString() {
         return "(" + subject + ", " + predicate + ", " + object + ")";

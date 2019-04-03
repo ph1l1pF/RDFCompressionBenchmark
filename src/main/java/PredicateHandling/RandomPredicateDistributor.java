@@ -1,6 +1,7 @@
 package PredicateHandling;
 
 import Util.Triple;
+import evaluation.StarGraphEvaluator;
 
 import java.util.ArrayList;
 import java.util.List;
