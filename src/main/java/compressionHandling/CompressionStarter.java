@@ -1,6 +1,5 @@
 package compressionHandling;
 
-import compressionHandling.CompressionResult;
 
 public interface CompressionStarter {
 

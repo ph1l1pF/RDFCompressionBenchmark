@@ -56,7 +56,7 @@ public class StarGraphEvaluator {
         for (List<Triple> graph : graphs) {
 
             String filePath = "file.ttl";
-            writeTriplesToFile(graph, filePath);
+            Util.Util.writeTriplesToFile(graph, filePath, HTTP_PREFIX_PREDICATE);
 
             HDTStarter hdtStarter = new HDTStarter();
             compressionResultsHDT.add(hdtStarter.compress(filePath, "fileCompressedWithHDT.hdt", true));
@@ -87,24 +87,6 @@ public class StarGraphEvaluator {
             System.out.print(compressionResult.getCompressionRatio() + ", ");
         }
 
-    }
-
-
-    private static void writeTriplesToFile(List<Triple> triples, String filePath) {
-        StringBuilder sb = new StringBuilder();
-        for (Triple triple : triples) {
-            sb.append("<" + HTTP_PREFIX_SUBJECT + triple.getSubject() + "> <" + HTTP_PREFIX_PREDICATE + triple.getPredicate() + "> <"
-                    + HTTP_PREFIX_OBJECT + triple.getObject() + "> .\n");
-        }
-        File file = new File(filePath);
-        if (file.exists()) {
-            file.delete();
-        }
-        try {
-            Files.write(sb.toString().getBytes(), file);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 
 
