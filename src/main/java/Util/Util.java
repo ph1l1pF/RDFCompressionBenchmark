@@ -82,22 +82,6 @@ public class Util {
         }
     }
 
-    public static void writeJenaTriplesToFile(List<org.apache.jena.graph.Triple> triples, String filePath, String prefix) {
-        StringBuilder sb = new StringBuilder();
-        for (org.apache.jena.graph.Triple triple : triples) {
-            sb.append("<" + prefix + triple.getSubject() + "> <" + prefix + triple.getPredicate() + "> <"
-                    + prefix + triple.getObject() + "> .\n");
-        }
-        File file = new File(filePath);
-        if (file.exists()) {
-            file.delete();
-        }
-        try {
-            Files.write(sb.toString().getBytes(), file);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
 
     public static List<File> getAllFileRecursively(String dirPath, String[] allowedSuffices) {
         File dir = new File(dirPath);
