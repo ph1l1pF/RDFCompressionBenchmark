@@ -3,11 +3,9 @@ package Inference;
 import compressionHandling.CompressionResult;
 import compressionHandling.CompressionStarter;
 import compressionHandling.GraphRePairStarter;
-import org.apache.jena.graph.Triple;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.reasoner.ReasonerRegistry;
-import org.apache.jena.util.iterator.ExtendedIterator;
 
 import java.io.File;
 import java.io.FileNotFoundException;

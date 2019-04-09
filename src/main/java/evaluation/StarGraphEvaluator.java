@@ -18,10 +18,6 @@ import java.util.Random;
 
 public class StarGraphEvaluator {
 
-    private static final String HTTP_PREFIX_SUBJECT = "http://subject/";
-    public static final String HTTP_PREFIX_PREDICATE = "http://predicate/";
-    private static final String HTTP_PREFIX_OBJECT = "http://object/";
-
     private static EvalResult evaluateStarGraphs() {
         List<List<Triple>> graphs = StarPatternGenerator.generateMultipleStarPatternGraphsWithFixedSize();
 
@@ -56,7 +52,7 @@ public class StarGraphEvaluator {
         for (List<Triple> graph : graphs) {
 
             String filePath = "file.ttl";
-            Util.Util.writeTriplesToFile(graph, filePath, HTTP_PREFIX_PREDICATE);
+            Util.Util.writeTriplesToFile(graph, filePath);
 
             HDTStarter hdtStarter = new HDTStarter();
             compressionResultsHDT.add(hdtStarter.compress(filePath, "fileCompressedWithHDT.hdt", true));

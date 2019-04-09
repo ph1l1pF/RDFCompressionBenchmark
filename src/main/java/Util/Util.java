@@ -13,6 +13,10 @@ import java.util.Random;
 
 public class Util {
 
+    private static final String HTTP_PREFIX_SUBJECT = "http://subject/";
+    private static final String HTTP_PREFIX_PREDICATE = "http://predicate/";
+    private static final String HTTP_PREFIX_OBJECT = "http://object/";
+
     private static final int TRIPLE_COMPONENT_LENGTH = 10;
 
     private static Random r = new Random();
@@ -65,11 +69,11 @@ public class Util {
         return model;
     }
 
-    public static void writeTriplesToFile(List<Triple> triples, String filePath, String prefix) {
+    public static void writeTriplesToFile(List<Triple> triples, String filePath) {
         StringBuilder sb = new StringBuilder();
         for (Triple triple : triples) {
-            sb.append("<" + prefix + triple.getSubject() + "> <" + prefix + triple.getPredicate() + "> <"
-                    + prefix + triple.getObject() + "> .\n");
+            sb.append("<" + HTTP_PREFIX_SUBJECT + triple.getSubject() + "> <" + HTTP_PREFIX_PREDICATE + triple.getPredicate() + "> <"
+                    + HTTP_PREFIX_OBJECT + triple.getObject() + "> .\n");
         }
         File file = new File(filePath);
         if (file.exists()) {
