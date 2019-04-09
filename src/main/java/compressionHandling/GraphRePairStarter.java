@@ -28,7 +28,7 @@ public class GraphRePairStarter implements CompressionStarter {
 
         // start new compression
         long compressionTime = System.currentTimeMillis();
-        Start.main(new String[]{"compress", filePath, "t=rdf"});
+        Start.main(new String[]{"compress", filePath, "t=rdf", "maxRank=2"});
         compressionTime = System.currentTimeMillis() - compressionTime;
 
         File inputFile = new File(filePath);
