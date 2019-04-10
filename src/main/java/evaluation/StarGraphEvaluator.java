@@ -57,7 +57,7 @@ public class StarGraphEvaluator {
             HDTStarter hdtStarter = new HDTStarter();
             compressionResultsHDT.add(hdtStarter.compress(filePath, "fileCompressedWithHDT.hdt", true));
 
-            GraphRePairStarter graphRePairStarter = new GraphRePairStarter();
+            GraphRePairStarter graphRePairStarter = new GraphRePairStarter(1);
             compressionResultsGRP.add(graphRePairStarter.compress(filePath, null, true));
 
             System.out.println("\n\n\n\n-----------------------");
@@ -77,12 +77,12 @@ public class StarGraphEvaluator {
 
         System.out.println("HDT compression ratios:");
         for (CompressionResult compressionResult : compressionResultsHDT) {
-            System.out.print(compressionResult.getCompressionTime() + ", ");
+            System.out.print(compressionResult.getCompressionRatio() + ", ");
         }
 
         System.out.println("\n\n GRP compression ratios:");
         for (CompressionResult compressionResult : compressionResultsGRP) {
-            System.out.print(compressionResult.getCompressionTime() + ", ");
+            System.out.print(compressionResult.getCompressionRatio() + ", ");
         }
 
     }
@@ -106,16 +106,7 @@ public class StarGraphEvaluator {
         }
     }
 
-    public static void main(String[] args) {
-//        evaluatePredicateAmount();
-
-        // multiple runnings for runtime measurement
-
-        List<EvalResult> evalResults = new ArrayList<>();
-        for (int i = 0; i < 100; i++) {
-            evalResults.add(evaluateStarGraphs());
-        }
-
+    private static void evaluateRunTimes(List<EvalResult> evalResults){
         // compute average run time
         long[] sumsHDT = new long[evalResults.get(0).compressionResultsHDT.size()];
         long[] sumsGRP = new long[evalResults.get(0).compressionResultsGRP.size()];
@@ -144,5 +135,19 @@ public class StarGraphEvaluator {
         for (int i = 0; i < avgsGRP.length; i++) {
             System.out.print(avgsGRP[i] + ",");
         }
+    }
+
+    public static void main(String[] args) {
+//        evaluatePredicateAmount();
+
+        // multiple runnings for runtime measurement
+
+        List<EvalResult> evalResults = new ArrayList<>();
+        int numExecutions = 1;
+        for (int i = 0; i < numExecutions; i++) {
+            evalResults.add(evaluateStarGraphs());
+        }
+
+
     }
 }

@@ -19,6 +19,8 @@ public class HDTStarter implements CompressionStarter {
         final String NTRIPLES = "ntriples";
         mapSuffixToFormat.put("ttl", NTRIPLES);
         mapSuffixToFormat.put("nt", NTRIPLES);
+        mapSuffixToFormat.put("inf", NTRIPLES);
+
     }
 
     public CompressionResult compress(String filePath, String outputName, boolean addDictionarySizeToCompressedSize) {

@@ -22,21 +22,28 @@ public class InferenceEvaluator {
 
         Model modelSchema = Util.Util.getModelFromFile(ontology.getAbsolutePath());
 
-        CompressionStarter grpStarter = new GraphRePairStarter();
+        CompressionStarter grpStarter = new GraphRePairStarter(2);
         for (File file : datasets) {
             // first, compress original file
 
             //TODO: soll dict mitgezählt werden? (eig. geht es ja eher um die Struktur)
             final boolean addDicToComprSize = false;
-            CompressionResult resultOriginal = grpStarter.compress(file.getAbsolutePath(), null, addDicToComprSize);
-            compressionResultsOriginal.add(resultOriginal);
+//            CompressionResult resultOriginal = grpStarter.compress(file.getAbsolutePath(), null, addDicToComprSize);
+//            compressionResultsOriginal.add(resultOriginal);
 
             // second, build inference model and compress it
             File fileInfModel = new File(file.getAbsolutePath() + ".inf");
 
-            Model infModel = ModelFactory.createInfModel(ReasonerRegistry.getOWLReasoner(), modelSchema,
-                    Util.Util.getModelFromFile(file.getAbsolutePath()));
+            Model normalModel = Util.Util.getModelFromFile(file.getAbsolutePath(),0.1);
+
+            Model infModel = ModelFactory.createInfModel(ReasonerRegistry.getOWLReasoner(), modelSchema,normalModel);
+
+            System.out.println("normal: "+normalModel.getGraph().size());
+            System.out.println("inf: "+infModel.getGraph().size());
+
             infModel.write(new FileOutputStream(fileInfModel), "N-TRIPLE");
+
+
 
             CompressionResult resultInf = grpStarter.compress(fileInfModel.getAbsolutePath(), null, addDicToComprSize);
             compressionResultsInference.add(resultInf);
@@ -75,8 +82,8 @@ public class InferenceEvaluator {
 
 
         try {
-            EvalResult evalResult = evaluateDatasetsWithOntology(new File[]{new File("/Users/philipfrerk/Documents/RDF_data/DBPedia_2015/geo-coordinates_en.nt")},
-                    new File("/Users/philipfrerk/Documents/RDF_data/DBPedia_2015/dbpedia_2015-04.owl"));
+            EvalResult evalResult = evaluateDatasetsWithOntology(new File[]{new File("geo-coordinates_en.nt")},
+                    new File("dbpedia_2015-04.owl"));
             for (CompressionResult compressionResultOrig : evalResult.compressionResultsOriginal) {
                 System.out.print(compressionResultOrig.getCompressionRatio() + ",");
             }

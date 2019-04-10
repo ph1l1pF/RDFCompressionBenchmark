@@ -2,8 +2,11 @@ package Util;
 
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.jena.ext.com.google.common.io.Files;
+import org.apache.jena.graph.Graph;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
+import org.apache.jena.sparql.graph.GraphFactory;
+import org.apache.jena.util.iterator.ExtendedIterator;
 
 import java.io.File;
 import java.io.IOException;
@@ -60,13 +63,29 @@ public class Util {
     }
 
     public static Model getModelFromFile(String filePath) {
+        return getModelFromFile(filePath,1);
+    }
+
+    public static Model getModelFromFile(String filePath, double percentage) {
         Model model = null;
         try {
             model = ModelFactory.createDefaultModel().read(filePath);
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return model;
+        if(percentage==1) {
+            return model;
+        }else{
+            Graph g = GraphFactory.createDefaultGraph();
+            int count =0;
+            int size = model.getGraph().size();
+            ExtendedIterator<org.apache.jena.graph.Triple> tripleExtendedIterator = model.getGraph().find();
+            while(1.0*count/size<=percentage && tripleExtendedIterator.hasNext()){
+                g.add(tripleExtendedIterator.next());
+                count++;
+            }
+            return ModelFactory.createModelForGraph(g);
+        }
     }
 
     public static void writeTriplesToFile(List<Triple> triples, String filePath) {
