@@ -9,6 +9,8 @@ import org.apache.jena.sparql.graph.GraphFactory;
 import org.apache.jena.util.iterator.ExtendedIterator;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -85,6 +87,17 @@ public class Util {
                 count++;
             }
             return ModelFactory.createModelForGraph(g);
+        }
+    }
+
+    public static void writeModelToFile(File file, Model model){
+        if(file.exists()){
+            file.delete();
+        }
+        try {
+            model.write(new FileOutputStream(file), "N-TRIPLE");
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
         }
     }
 

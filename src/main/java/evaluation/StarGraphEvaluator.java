@@ -6,6 +6,7 @@ import PredicateHandling.RandomPredicateDistributor;
 import Util.Triple;
 import compressionHandling.CompressionResult;
 import compressionHandling.GraphRePairStarter;
+import compressionHandling.GzipStarter;
 import compressionHandling.HDTStarter;
 import org.apache.jena.ext.com.google.common.io.Files;
 
@@ -47,6 +48,7 @@ public class StarGraphEvaluator {
     private static EvalResult evaluateCompressors(List<List<Triple>> graphs) {
         List<CompressionResult> compressionResultsHDT = new ArrayList<>();
         List<CompressionResult> compressionResultsGRP = new ArrayList<>();
+        List<CompressionResult> compressionResultsGzip = new ArrayList<>();
 
         int count = 0;
         for (List<Triple> graph : graphs) {
@@ -57,8 +59,11 @@ public class StarGraphEvaluator {
             HDTStarter hdtStarter = new HDTStarter();
             compressionResultsHDT.add(hdtStarter.compress(filePath, "fileCompressedWithHDT.hdt", true));
 
-            GraphRePairStarter graphRePairStarter = new GraphRePairStarter(1);
+            GraphRePairStarter graphRePairStarter = new GraphRePairStarter();
             compressionResultsGRP.add(graphRePairStarter.compress(filePath, null, true));
+
+            GzipStarter gzipStarter = new GzipStarter();
+            compressionResultsGzip.add(gzipStarter.compress(filePath, "fileCompressedWithGzip.gzip", true));
 
             System.out.println("\n\n\n\n-----------------------");
             System.out.println(100.0 * count / graphs.size() + "% done");
@@ -66,13 +71,13 @@ public class StarGraphEvaluator {
             count++;
         }
 
-        printResults(compressionResultsHDT, compressionResultsGRP);
+        printResults(compressionResultsHDT, compressionResultsGRP,compressionResultsGzip);
 
-        return new EvalResult(compressionResultsHDT, compressionResultsGRP);
+        return new EvalResult(compressionResultsHDT, compressionResultsGRP,compressionResultsGzip);
     }
 
 
-    private static void printResults(List<CompressionResult> compressionResultsHDT, List<CompressionResult> compressionResultsGRP) {
+    private static void printResults(List<CompressionResult> compressionResultsHDT, List<CompressionResult> compressionResultsGRP, List<CompressionResult> compressionResultsGzip) {
         System.out.println("\n\n\n\n-----------------------");
 
         System.out.println("HDT compression ratios:");
@@ -82,6 +87,11 @@ public class StarGraphEvaluator {
 
         System.out.println("\n\n GRP compression ratios:");
         for (CompressionResult compressionResult : compressionResultsGRP) {
+            System.out.print(compressionResult.getCompressionRatio() + ", ");
+        }
+
+        System.out.println("\n\n Gzip compression ratios:");
+        for (CompressionResult compressionResult : compressionResultsGzip) {
             System.out.print(compressionResult.getCompressionRatio() + ", ");
         }
 
@@ -98,11 +108,12 @@ public class StarGraphEvaluator {
     }
 
     private static class EvalResult {
-        List<CompressionResult> compressionResultsHDT, compressionResultsGRP;
+        List<CompressionResult> compressionResultsHDT, compressionResultsGRP, compressionResultsGzip;
 
-        public EvalResult(List<CompressionResult> compressionResultsHDT, List<CompressionResult> compressionResultsGRP) {
+        public EvalResult(List<CompressionResult> compressionResultsHDT, List<CompressionResult> compressionResultsGRP,List<CompressionResult> compressionResultsGzip) {
             this.compressionResultsHDT = compressionResultsHDT;
             this.compressionResultsGRP = compressionResultsGRP;
+            this.compressionResultsGzip = compressionResultsGzip;
         }
     }
 

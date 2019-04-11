@@ -3,6 +3,7 @@ package Inference;
 import compressionHandling.CompressionResult;
 import compressionHandling.CompressionStarter;
 import compressionHandling.GraphRePairStarter;
+import org.apache.jena.base.Sys;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.reasoner.ReasonerRegistry;
@@ -22,27 +23,28 @@ public class InferenceEvaluator {
 
         Model modelSchema = Util.Util.getModelFromFile(ontology.getAbsolutePath());
 
+        //TODO: soll dict mitgezählt werden? (eig. geht es ja eher um die Struktur)
+        final boolean addDicToComprSize = true;
+
         CompressionStarter grpStarter = new GraphRePairStarter(2);
         for (File file : datasets) {
             // first, compress original file
 
-            //TODO: soll dict mitgezählt werden? (eig. geht es ja eher um die Struktur)
-            final boolean addDicToComprSize = false;
-//            CompressionResult resultOriginal = grpStarter.compress(file.getAbsolutePath(), null, addDicToComprSize);
-//            compressionResultsOriginal.add(resultOriginal);
+            final double percentageOfFile = 0.001;
+
+            Model model = Util.Util.getModelFromFile(file.getAbsolutePath(), percentageOfFile);
+            File reducedFile = new File("reduced.ttl");
+            Util.Util.writeModelToFile(reducedFile, model);
+
+            CompressionResult resultOriginal = grpStarter.compress(reducedFile.getName(), null, addDicToComprSize);
+            compressionResultsOriginal.add(resultOriginal);
 
             // second, build inference model and compress it
-            File fileInfModel = new File(file.getAbsolutePath() + ".inf");
+            File fileInfModel = new File(reducedFile.getAbsolutePath() + ".inf");
+            Model infModel = ModelFactory.createInfModel(ReasonerRegistry.getOWLReasoner(), modelSchema, model);
 
-            Model normalModel = Util.Util.getModelFromFile(file.getAbsolutePath(),0.1);
-
-            Model infModel = ModelFactory.createInfModel(ReasonerRegistry.getOWLReasoner(), modelSchema,normalModel);
-
-            System.out.println("normal: "+normalModel.getGraph().size());
-            System.out.println("inf: "+infModel.getGraph().size());
-
-            infModel.write(new FileOutputStream(fileInfModel), "N-TRIPLE");
-
+            System.out.println("inference size ratio: " + 1.0 * infModel.getGraph().size() / model.getGraph().size());
+            Util.Util.writeModelToFile(fileInfModel, infModel);
 
 
             CompressionResult resultInf = grpStarter.compress(fileInfModel.getAbsolutePath(), null, addDicToComprSize);
@@ -50,7 +52,7 @@ public class InferenceEvaluator {
         }
 
         // finally, also compress ontology itself
-        CompressionResult resultOnt = grpStarter.compress(ontology.getAbsolutePath(), null, true);
+        CompressionResult resultOnt = grpStarter.compress(ontology.getAbsolutePath(), null, addDicToComprSize);
         return new EvalResult(compressionResultsOriginal, compressionResultsInference, resultOnt);
     }
 
@@ -98,8 +100,8 @@ public class InferenceEvaluator {
     }
 
     private static class EvalResult {
-        private List<CompressionResult> compressionResultsOriginal = new ArrayList<>();
-        private List<CompressionResult> compressionResultsInference = new ArrayList<>();
+        private List<CompressionResult> compressionResultsOriginal;
+        private List<CompressionResult> compressionResultsInference;
         private CompressionResult ontologyResult;
 
         public EvalResult(List<CompressionResult> compressionResultsOriginal, List<CompressionResult> compressionResultsInference, CompressionResult ontologyResult) {
