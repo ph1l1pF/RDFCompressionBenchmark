@@ -92,7 +92,7 @@ public class QueryExecutor {
     }
 
     public static void main(String[] args) {
-        Model model = Util.getModelFromFile("labels_en.ttl");
+        Model model = Util.getModelFromFile("geo-coordinates_en.nt");
         Model ontology = Util.getModelFromFile("dbpedia_2015-04.owl");
 
         GraphRePairStarter graphRePairStarter = new GraphRePairStarter();
@@ -102,8 +102,6 @@ public class QueryExecutor {
 
         LinkedHashMap<String, List<String>> allEquivalentPredicates = getAllEquivalentPredicates(ontology);
         replaceAllEquivalentPredicates(model, allEquivalentPredicates);
-
-        System.out.println("fertig");
 
 //        Util.writeModelToFile(new File("bla1.ttl"), model);
 
