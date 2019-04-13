@@ -2,6 +2,8 @@ package Inference;
 
 
 import Util.Util;
+import compressionHandling.CompressionResult;
+import compressionHandling.GraphRePairStarter;
 import org.apache.jena.graph.Triple;
 import org.apache.jena.query.*;
 import org.apache.jena.rdf.model.Model;
@@ -90,16 +92,20 @@ public class QueryExecutor {
     }
 
     public static void main(String[] args) {
-//        Model model = Util.getModelFromFile("labels_en.ttl");
-//        Model ontology = Util.getModelFromFile("dbpedia_2015-04.owl");
-//
-//
-//        LinkedHashMap<String, List<String>> allEquivalentPredicates = getAllEquivalentPredicates(ontology);
-//        replaceAllEquivalentPredicates(model, allEquivalentPredicates);
-//
-//        Util.writeModelToFile(new File("bla1.ttl"), model);
+        Model model = Util.getModelFromFile("labels_en.ttl");
+        Model ontology = Util.getModelFromFile("dbpedia_2015-04.owl");
 
-        System.out.println("hi was geht");
+        GraphRePairStarter graphRePairStarter = new GraphRePairStarter();
+        CompressionResult result = graphRePairStarter.compress("file.ttl", null, true);
+        System.out.println(result);
+
+
+        LinkedHashMap<String, List<String>> allEquivalentPredicates = getAllEquivalentPredicates(ontology);
+        replaceAllEquivalentPredicates(model, allEquivalentPredicates);
+
+        System.out.println("fertig");
+
+//        Util.writeModelToFile(new File("bla1.ttl"), model);
 
 //
 
