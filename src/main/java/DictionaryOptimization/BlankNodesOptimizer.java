@@ -63,7 +63,6 @@ public class BlankNodesOptimizer {
             shortId = String.valueOf(idCounter);
             longToShortId.put(longId, shortId);
         }
-
         return (Node_Blank) NodeFactory.createBlankNode(shortId);
     }
 
