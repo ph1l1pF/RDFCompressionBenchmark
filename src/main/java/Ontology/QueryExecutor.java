@@ -1,4 +1,4 @@
-package Inference;
+package Ontology;
 
 
 import Util.Util;
@@ -13,7 +13,6 @@ import org.apache.jena.util.iterator.ExtendedIterator;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.OpenOption;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -21,16 +20,10 @@ import java.util.List;
 
 public class QueryExecutor {
 
-    public static final String FUNCTIONAL_PROPERTY = "http://www.w3.org/2002/07/owl#FunctionalProperty";
-    private static final String EUIVALENT_PROPERTIES = "http://www.w3.org/2002/07/owl#equivalentProperty";
-
 
     public static ResultSet executeSparql(Model model, String sparql, boolean isQuery) {
-
         ParameterizedSparqlString parameterizedSparql = new ParameterizedSparqlString(model);
         parameterizedSparql.setCommandText(sparql);
-//        parameterizedSparql.setParam("objectURI", resource);
-//        parameterizedSparql.setParam("labelLanguage", model.createLiteral(language.getCode(), ""));
 
         if (isQuery) {
             Query query = QueryFactory.create(parameterizedSparql.asQuery());
@@ -42,13 +35,14 @@ public class QueryExecutor {
         }
     }
 
-    private static List<String> getAllPredicatesWithProperty(Model ontModel, String property) {
+
+    public static List<String> getAllPredicatesWithUnaryProperty(Model ontology, String property){
         String spaqrl = "select ?p1" +
                 "where {" +
                 "?p1 <" + property + "> ?o" +
                 "}";
 
-        ResultSet rs = executeSparql(ontModel, spaqrl, true);
+        ResultSet rs = QueryExecutor.executeSparql(ontology, spaqrl, true);
         List<String> predicates = new ArrayList<>();
         while (rs.hasNext()) {
             QuerySolution next = rs.next();
@@ -58,14 +52,19 @@ public class QueryExecutor {
         return predicates;
     }
 
-    private static LinkedHashMap<String, List<String>> getAllEquivalentPredicates(Model ontModel) {
+    public static int countAllPredicatesWithUnaryProperty(Model ontology, String property){
+        return getAllPredicatesWithUnaryProperty(ontology,property).size();
+    }
+
+
+    public static LinkedHashMap<String, List<String>> getAllPredicateEuivClassesWithBinaryProperty(Model ontology, String property){
         String sparql = "select ?p1 ?p2\n" +
                 "where{\n" +
-                "   ?p1 <"+EUIVALENT_PROPERTIES+"> ?p2\n" +
+                "   ?p1 <"+property+"> ?p2\n" +
                 "}";
 
         LinkedHashMap<String, List<String>> mapEquivalences = new LinkedHashMap<>();
-        ResultSet resultSet = executeSparql(ontModel, sparql, true);
+        ResultSet resultSet = QueryExecutor.executeSparql(ontology, sparql, true);
         while (resultSet.hasNext()) {
             QuerySolution next = resultSet.next();
             String key = next.get("?p1").toString();
@@ -83,47 +82,54 @@ public class QueryExecutor {
         return mapEquivalences;
     }
 
-
-    private static void printModel(Model model) {
-        ExtendedIterator<Triple> tripleExtendedIterator = model.getGraph().find();
-        while (tripleExtendedIterator.hasNext()) {
-            System.out.println(tripleExtendedIterator.next());
-        }
+    public static int countAllPredicateEuivClassesWithBinaryProperty(Model ontology, String property){
+        return getAllPredicateEuivClassesWithBinaryProperty(ontology,property).size();
     }
 
-    public static void main(String[] args) throws IOException {
-//        Model model = Util.getModelFromFile("geo-coordinates_en.nt");
-//        Model ontology = Util.getModelFromFile("dbpedia_2015-04.owl");
+    public static long countTriplesContainingPredicate(Model data, String predicate){
+        String spaqrl = "select ?s ?p1 ?o " +
+                "where {" +
+                "?s <" + predicate + "> ?o" +
+                "}";
+
+        ResultSet rs = QueryExecutor.executeSparql(data, spaqrl, true);
+        long numTriples=0;
+        while (rs.hasNext()) {
+            rs.next();
+            numTriples++;
+        }
+        return numTriples;
+    }
 
 
-//        LinkedHashMap<String, List<String>> allEquivalentPredicates = getAllEquivalentPredicates(ontology);
-//        replaceAllEquivalentPredicates(model, allEquivalentPredicates);
 
-//        Util.writeModelToFile(new File("bla1.ttl"), model);
-
-//
-
-//        Dataset dataset = DatasetFactory.create();
-//        dataset.addNamedModel("data",model);
-//        dataset.addNamedModel("ontology",ontology);
+    public static void main(String[] args)  {
         File file = new File("latestResults.txt");
         if(file.exists()){
             file.delete();
         }
 
         try {
+            GraphRePairStarter graphRePairStarter = new GraphRePairStarter();
 
-            GraphRePairStarter graphRePairStarter = new GraphRePairStarter(3);
-            CompressionResult compress = graphRePairStarter.compress("instance_types_dbtax-dbo.nt", null, true);
+            String name = "instance_types_dbtax-dbo.nt";
+            Model modelFromFile = Util.getModelFromFile(name, 0.1);
+            String newName = "newFile.ttl";
+            Util.writeModelToFile(new File(newName), modelFromFile);
 
-            Files.write(Paths.get(file.getAbsolutePath()), compress.toString().getBytes());
-        }catch(Exception e){
+            System.out.println("fertig");
+
+            CompressionResult result = graphRePairStarter.compress(newName, null, true);
+
+            Files.write(Paths.get(file.getAbsolutePath()), result.toString().getBytes());
+        }catch(OutOfMemoryError e){
             try {
                 Files.write(Paths.get(file.getAbsolutePath()), e.toString().getBytes());
             } catch (IOException e1) { }
 
             System.out.println("error written to file");
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
-
 }

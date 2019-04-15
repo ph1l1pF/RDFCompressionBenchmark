@@ -1,16 +1,14 @@
-package Inference;
+package Ontology;
 
 import compressionHandling.CompressionResult;
 import compressionHandling.CompressionStarter;
 import compressionHandling.GraphRePairStarter;
-import org.apache.jena.base.Sys;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.reasoner.ReasonerRegistry;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
