@@ -87,9 +87,9 @@ public class QueryExecutor {
     }
 
     public static long countTriplesContainingPredicate(Model data, String predicate){
-        String spaqrl = "select ?s ?p1 ?o " +
-                "where {" +
-                "?s <" + predicate + "> ?o" +
+        String spaqrl = "select ?s ?p1 ?o \n" +
+                "where {\n" +
+                "?s <" + predicate + "> ?o \n" +
                 "}";
 
         ResultSet rs = QueryExecutor.executeSparql(data, spaqrl, true);

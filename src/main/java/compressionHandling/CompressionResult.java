@@ -17,11 +17,15 @@ public class CompressionResult implements Comparable {
 
     @Override
     public String toString() {
-        return "original size: " + originalSize + "\n"+
+        return  "Compression Result: {\n"+
+                "file name: "+ fileName + "\n"+
+                "original size: " + originalSize + "\n"+
                 "compressed size: " + compressedSize + "\n"+
+                "compressed dict size: " + compressionDictionarySize + "\n"+
                 "compression ratio: " + getCompressionRatio()+"\n"+
                 "compression time: "+compressionTime+"\n"+
-                "decompressionTime: " + decompressionTime;
+                "decompressionTime: " + decompressionTime+"\n"
+                +"}\n";
     }
 
     public double getCompressionRatio(){
