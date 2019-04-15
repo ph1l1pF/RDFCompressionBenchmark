@@ -89,7 +89,9 @@ public class CompressionEvaluator {
     public static void main(String[] args) throws IOException {
 
         File dirResults = new File("Latest_Results");
-        dirResults.mkdir();
+        if(!dirResults.exists()) {
+            dirResults.mkdir();
+        }
         List<File> resultFiles = new ArrayList<>();
         resultFiles.add(new File(dirResults.getName()+"/original_results.txt"));
         resultFiles.add(new File(dirResults.getName()+"/equivalence_results.txt"));
