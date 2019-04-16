@@ -42,9 +42,10 @@ public class CompressionEvaluator {
             filesManipulated.add(fileManipulated.getAbsolutePath());
         }
 
-        evaluateData(filesManipulated,fileResult);
+        evaluateData(filesManipulated, fileResult);
     }
-    private static void evaluateTransitiveMaterialization(List<String> files, String ontology, File fileResult) {
+
+    private static void evaluateTransitiveDeMaterialization(List<String> files, String ontology, File fileResult) {
         List<String> filesManipulated = new ArrayList<>();
         List<String> allTransitivePredicates = OntologyEvaluator.getAllTransitivePredicates(Util.getModelFromFile(ontology));
         for (String fileOriginal : files) {
@@ -55,32 +56,30 @@ public class CompressionEvaluator {
             filesManipulated.add(fileManipulated.getAbsolutePath());
         }
 
-        evaluateData(filesManipulated,fileResult);
+        evaluateData(filesManipulated, fileResult);
     }
 
     private static void evaluateData(List<String> files, File fileResult) {
-        List<CompressionResult> results= new ArrayList<>();
-
         final boolean addDictSize = false;
 
         CompressionStarter cs = new GraphRePairStarter();
         for (String fileOriginal : files) {
             CompressionResult result;
             try {
-                 result = cs.compress(fileOriginal, null, addDictSize);
-            }catch(Exception | OutOfMemoryError e){
+                result = cs.compress(fileOriginal, null, addDictSize);
+            } catch (Exception | OutOfMemoryError e) {
+                appendStringToFile(fileResult, "\n Error with file " + fileOriginal + " : " + e.toString() + "\n");
                 continue;
             }
-            results.add(result);
-            appendResultToFile(fileResult,result);
+            appendStringToFile(fileResult, result.toString());
         }
 
     }
 
-    private static void appendResultToFile(File file, CompressionResult result){
+    private static void appendStringToFile(File file, String string) {
         try {
-            Files.write(Paths.get(file.getAbsolutePath()), result.toString().getBytes(), StandardOpenOption.APPEND);
-        }catch (IOException e) {
+            Files.write(Paths.get(file.getAbsolutePath()), string.getBytes(), StandardOpenOption.APPEND);
+        } catch (IOException e) {
             // will not happen
             e.printStackTrace();
         }
@@ -89,17 +88,17 @@ public class CompressionEvaluator {
     public static void main(String[] args) throws IOException {
 
         File dirResults = new File("Latest_Results");
-        if(!dirResults.exists()) {
+        if (!dirResults.exists()) {
             dirResults.mkdir();
         }
         List<File> resultFiles = new ArrayList<>();
-        resultFiles.add(new File(dirResults.getName()+"/original_results.txt"));
-        resultFiles.add(new File(dirResults.getName()+"/equivalence_results.txt"));
-        resultFiles.add(new File(dirResults.getName()+"/symmetrie_results.txt"));
-        resultFiles.add(new File(dirResults.getName()+"/transitive_results.txt"));
+        resultFiles.add(new File(dirResults.getName() + "/original_results.txt"));
+        resultFiles.add(new File(dirResults.getName() + "/equivalence_results.txt"));
+        resultFiles.add(new File(dirResults.getName() + "/symmetrie_results.txt"));
+        resultFiles.add(new File(dirResults.getName() + "/transitive_results.txt"));
 
-        for(File file : resultFiles){
-            if(file.exists()){
+        for (File file : resultFiles) {
+            if (file.exists()) {
                 file.delete();
             }
             file.createNewFile();
@@ -107,7 +106,11 @@ public class CompressionEvaluator {
 
         // evaluate original files
         List<String> files = new ArrayList<>();
-        files.add("instance-types_en.ttl");
+
+        Model model = Util.getModelFromFile("instance-types_en.ttl",0.1);
+        Util.writeModelToFile(new File("instance-types_en_small.ttl"),model);
+
+        files.add("instance-types_en_small.ttl");
         evaluateData(files, resultFiles.get(0));
     }
 }
