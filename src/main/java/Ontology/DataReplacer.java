@@ -65,10 +65,15 @@ public class DataReplacer {
     public static int dematerializeAllTransitivePredicates(Model model, List<String> predicates) {
         //TODO: not working yet
         for (String pred : predicates) {
-            String sparql = "DELETE { ?s <" + pred + "> ?o}\n" +
+//            String sparql = "DELETE { ?s <" + pred + "> ?o}\n" +
+//                    "WHERE { \n" +
+//                    "?s <" + pred + ">{2,} ?o.\n}";
+////                    "?s <"+pred+"> ?o }";
+
+            String sparql = "DELETE { ?s ?p ?o}\n" +
                     "WHERE { \n" +
-                    "?s <" + pred + "> {2,} ?o.\n}";
-//                    "?s <"+pred+"> ?o }";
+                    "?s ?p{2,} ?o.\n"+
+            "FILTER (?p = <" + pred + ">) \n}";
 
 
             QueryExecutor.executeSparql(model, sparql, false);
@@ -85,17 +90,17 @@ public class DataReplacer {
         List<String> p = new ArrayList<>();
         p.add("http://5");
 //        materializeAllSymmetricPredicates(m,p);
-//        dematerializeAllTransitivePredicates(m,p);
+        dematerializeAllTransitivePredicates(m,p);
 
-
-        Map<String, List<String>> euivalenceMapping = new HashMap<>();
-        String key = "http://5";
-        List<String> value = new ArrayList<>();
-        value.add("http://6");
-        euivalenceMapping.put(key, value);
-
-        replaceAllEquivalentPredicates(m, euivalenceMapping);
-        Util.Util.printModel(m);
+//
+//        Map<String, List<String>> euivalenceMapping = new HashMap<>();
+//        String key = "http://5";
+//        List<String> value = new ArrayList<>();
+//        value.add("http://6");
+//        euivalenceMapping.put(key, value);
+//
+//        replaceAllEquivalentPredicates(m, euivalenceMapping);
+//        Util.Util.printModel(m);
 
     }
 

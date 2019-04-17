@@ -1,1 +1,3 @@
-<0> <http://www.wikidata.org/entity/P575> <1> .
+<http://0> <http://5> <http://1> .
+<http://1> <http://6> <http://0> .
+<http://3> <http://6> <http://0> .

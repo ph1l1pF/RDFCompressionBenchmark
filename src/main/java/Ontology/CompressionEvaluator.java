@@ -119,7 +119,7 @@ public class CompressionEvaluator {
     private static List<String> prepareDataFiles() {
 
         // TODO: here add the files to evaluate
-        String[] originalFiles = new String[]{"instance-types_en.ttl"};
+        String[] originalFiles = new String[]{"instance-types_en.ttl","persondata_en.ttl"};
 
         List<String> smallFiles = new ArrayList<>();
         for (String originalFile : originalFiles) {
@@ -130,6 +130,8 @@ public class CompressionEvaluator {
 
             smallFiles.add(smallFile.getAbsolutePath());
         }
+
+        System.out.println("Finished data files preparation.");
 
         return smallFiles;
     }
