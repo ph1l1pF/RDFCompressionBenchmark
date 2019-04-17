@@ -5,6 +5,9 @@ import org.apache.jena.ext.com.google.common.io.Files;
 import org.apache.jena.graph.Graph;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
+import org.apache.jena.riot.RDFDataMgr;
+import org.apache.jena.riot.system.StreamRDF;
+import org.apache.jena.riot.system.StreamRDFBase;
 import org.apache.jena.sparql.graph.GraphFactory;
 import org.apache.jena.util.iterator.ExtendedIterator;
 
@@ -23,6 +26,8 @@ public class Util {
     private static final String HTTP_PREFIX_OBJECT = "http://object/";
 
     private static final int TRIPLE_COMPONENT_LENGTH = 10;
+
+    public static final int TRIPLE_AMOUNT = 200000;
 
     private static Random r = new Random();
 
@@ -65,24 +70,54 @@ public class Util {
     }
 
     public static Model getModelFromFile(String filePath) {
-        return getModelFromFile(filePath,1);
+        return getModelFromFile(filePath, 1.0);
     }
 
-    public static Model getModelFromFile(String filePath, double percentage) {
+    public static Model getModelFromFile(String filePath, int numTriples) {
         Model model = null;
         try {
             model = ModelFactory.createDefaultModel().read(filePath);
         } catch (Exception e) {
             e.printStackTrace();
         }
-        if(percentage==1) {
+
+
+
+//        StreamRDFBase destination = new Stream();
+//        RDFDataMgr.parse(destination, filePath) ;
+
+
+        Graph g = GraphFactory.createDefaultGraph();
+        int count = 0;
+        ExtendedIterator<org.apache.jena.graph.Triple> tripleExtendedIterator = model.getGraph().find();
+        while (count < numTriples && tripleExtendedIterator.hasNext()) {
+            g.add(tripleExtendedIterator.next());
+            count++;
+        }
+        return ModelFactory.createModelForGraph(g);
+
+    }
+
+    public static Model getModelFromFile(String filePath, double percentage) {
+
+        if(percentage<=0 || percentage>1){
+            throw new IllegalArgumentException();
+        }
+
+        Model model = null;
+        try {
+            model = ModelFactory.createDefaultModel().read(filePath);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        if (percentage == 1) {
             return model;
-        }else{
+        } else {
             Graph g = GraphFactory.createDefaultGraph();
-            int count =0;
+            int count = 0;
             int size = model.getGraph().size();
             ExtendedIterator<org.apache.jena.graph.Triple> tripleExtendedIterator = model.getGraph().find();
-            while(1.0*count/size<=percentage && tripleExtendedIterator.hasNext()){
+            while (1.0 * count / size <= percentage && tripleExtendedIterator.hasNext()) {
                 g.add(tripleExtendedIterator.next());
                 count++;
             }
@@ -90,8 +125,18 @@ public class Util {
         }
     }
 
-    public static void writeModelToFile(File file, Model model){
-        if(file.exists()){
+    public static void printModel(Model model){
+        ExtendedIterator<org.apache.jena.graph.Triple> tripleExtendedIterator = model.getGraph().find();
+        System.out.println("Model:");
+        while (tripleExtendedIterator.hasNext()){
+            System.out.println(tripleExtendedIterator.next());
+        }
+        System.out.println();
+
+    }
+
+    public static void writeModelToFile(File file, Model model) {
+        if (file.exists()) {
             file.delete();
         }
         try {
@@ -158,6 +203,20 @@ public class Util {
             }
         }
         return false;
+    }
+
+    public static String appendStringToFileName(String fileName, String string){
+        String[] split = fileName.split("\\.");
+        String newName = "";
+        for (int i = 0; i < split.length-1; i++) {
+            newName+=split[i];
+            if(i<split.length-2){
+                newName+=".";
+            }
+        }
+        newName+=string+".";
+        newName+=split[split.length-1];
+        return newName;
     }
 
 }

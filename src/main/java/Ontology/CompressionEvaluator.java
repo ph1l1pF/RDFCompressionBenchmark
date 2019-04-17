@@ -22,13 +22,16 @@ public class CompressionEvaluator {
         LinkedHashMap<String, List<String>> euivalentProperties = OntologyEvaluator.getAllEuivalentProperties(Util.getModelFromFile(ontology));
         for (String fileOriginal : files) {
             Model model = Util.getModelFromFile(fileOriginal);
-            DataReplacer.replaceAllEquivalentPredicates(model, euivalentProperties);
-            File fileManipulated = new File(fileOriginal + ".eq");
+            int numReplacements = DataReplacer.replaceAllEquivalentPredicates(model, euivalentProperties);
+            appendStringToFile(fileResult, "# euiv replacements in file " + fileOriginal + " : " + numReplacements);
+
+
+            File fileManipulated = new File(fileOriginal + ".eq.ttl");
             Util.writeModelToFile(fileManipulated, model);
             filesManipulated.add(fileManipulated.getAbsolutePath());
         }
 
-        evaluateData(filesManipulated, fileResult);
+        evaluateCompression(filesManipulated, fileResult);
     }
 
     private static void evaluateSymmetricMaterialization(List<String> files, String ontology, File fileResult) {
@@ -36,13 +39,16 @@ public class CompressionEvaluator {
         List<String> allSymmetricPredicates = OntologyEvaluator.getAllSymmetricPredicates(Util.getModelFromFile(ontology));
         for (String fileOriginal : files) {
             Model model = Util.getModelFromFile(fileOriginal);
-            DataReplacer.materializeAllSymmetricPredicates(model, allSymmetricPredicates);
-            File fileManipulated = new File(fileOriginal + ".sym");
+            int numReplacements = DataReplacer.materializeAllSymmetricPredicates(model, allSymmetricPredicates);
+
+            appendStringToFile(fileResult, "# symm replacements in file " + fileOriginal + " : " + numReplacements);
+
+            File fileManipulated = new File(fileOriginal + ".sym.ttl");
             Util.writeModelToFile(fileManipulated, model);
             filesManipulated.add(fileManipulated.getAbsolutePath());
         }
 
-        evaluateData(filesManipulated, fileResult);
+        evaluateCompression(filesManipulated, fileResult);
     }
 
     private static void evaluateTransitiveDeMaterialization(List<String> files, String ontology, File fileResult) {
@@ -50,43 +56,46 @@ public class CompressionEvaluator {
         List<String> allTransitivePredicates = OntologyEvaluator.getAllTransitivePredicates(Util.getModelFromFile(ontology));
         for (String fileOriginal : files) {
             Model model = Util.getModelFromFile(fileOriginal);
-            DataReplacer.dematerializeAllTransitivePredicates(model, allTransitivePredicates);
-            File fileManipulated = new File(fileOriginal + ".tra");
+            int numReplacements = DataReplacer.dematerializeAllTransitivePredicates(model, allTransitivePredicates);
+
+            appendStringToFile(fileResult, "# trans replacements in file " + fileOriginal + " : " + numReplacements);
+
+            File fileManipulated = new File(fileOriginal + ".tra.ttl");
             Util.writeModelToFile(fileManipulated, model);
             filesManipulated.add(fileManipulated.getAbsolutePath());
         }
 
-        evaluateData(filesManipulated, fileResult);
+        evaluateCompression(filesManipulated, fileResult);
     }
 
-    private static void evaluateData(List<String> files, File fileResult) {
+    private static void evaluateCompression(List<String> files, File fileResult) {
         final boolean addDictSize = false;
 
         CompressionStarter cs = new GraphRePairStarter();
         for (String fileOriginal : files) {
             CompressionResult result;
             try {
-                result = cs.compress(fileOriginal, null, addDictSize);
+                String[] split = fileOriginal.split("/");
+                result = cs.compress(split[split.length-1], null, addDictSize);
             } catch (Exception | OutOfMemoryError e) {
                 appendStringToFile(fileResult, "\n Error with file " + fileOriginal + " : " + e.toString() + "\n");
                 continue;
             }
             appendStringToFile(fileResult, result.toString());
         }
-
     }
 
     private static void appendStringToFile(File file, String string) {
+        String s = string + "\n";
         try {
-            Files.write(Paths.get(file.getAbsolutePath()), string.getBytes(), StandardOpenOption.APPEND);
+            Files.write(Paths.get(file.getAbsolutePath()), s.getBytes(), StandardOpenOption.APPEND);
         } catch (IOException e) {
             // will not happen
             e.printStackTrace();
         }
     }
 
-    public static void main(String[] args) throws IOException {
-
+    private static List<File> prepareResultFiles() throws IOException {
         File dirResults = new File("Latest_Results");
         if (!dirResults.exists()) {
             dirResults.mkdir();
@@ -104,13 +113,39 @@ public class CompressionEvaluator {
             file.createNewFile();
         }
 
-        // evaluate original files
-        List<String> files = new ArrayList<>();
+        return resultFiles;
+    }
 
-        Model model = Util.getModelFromFile("instance-types_en.ttl",0.1);
-        Util.writeModelToFile(new File("instance-types_en_small.ttl"),model);
+    private static List<String> prepareDataFiles() {
 
-        files.add("instance-types_en_small.ttl");
-        evaluateData(files, resultFiles.get(0));
+        // TODO: here add the files to evaluate
+        String[] originalFiles = new String[]{"instance-types_en.ttl"};
+
+        List<String> smallFiles = new ArrayList<>();
+        for (String originalFile : originalFiles) {
+            Model model = Util.getModelFromFile(originalFile, Util.TRIPLE_AMOUNT);
+            String small = Util.appendStringToFileName(originalFile, "_small");
+            File smallFile = new File(small);
+            Util.writeModelToFile(smallFile, model);
+
+            smallFiles.add(smallFile.getAbsolutePath());
+        }
+
+        return smallFiles;
+    }
+
+    public static void main(String[] args) throws IOException {
+
+        List<File> resultFiles = prepareResultFiles();
+        List<String> dataFiles = prepareDataFiles();
+
+        final String ontology = "dbpedia_2015-04.owl";
+
+        evaluateCompression(dataFiles, resultFiles.get(0));
+
+        evaluateEuivReplacement(dataFiles, ontology, resultFiles.get(1));
+        evaluateSymmetricMaterialization(dataFiles, ontology, resultFiles.get(2));
+        evaluateTransitiveDeMaterialization(dataFiles, ontology, resultFiles.get(3));
+
     }
 }
