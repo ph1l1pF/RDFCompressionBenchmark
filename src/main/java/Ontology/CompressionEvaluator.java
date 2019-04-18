@@ -139,8 +139,8 @@ public class CompressionEvaluator {
             Model model=null;
             try {
                  model = Util.getModelFromFile(originalFile, Util.TRIPLE_AMOUNT);
-            }catch (RiotException e){
-                System.out.println("RiotExpection in file "+originalFile);
+            }catch (Exception e){
+                System.out.println("Expection in file "+originalFile);
                 continue;
             }
             String small = Util.appendStringToFileName(originalFile, "_small");
