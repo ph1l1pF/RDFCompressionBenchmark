@@ -8,6 +8,7 @@ import org.apache.jena.rdf.model.Model;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
@@ -119,10 +120,17 @@ public class CompressionEvaluator {
     private static List<String> prepareDataFiles() {
 
         // TODO: here add the files to evaluate
-        String[] originalFiles = new String[]{"instance-types_en.ttl","persondata_en.ttl"};
+//        String[] originalFiles = new String[]{"instance-types_en.ttl","persondata_en.ttl","external-links_en.ttl"};
+        List<String> originalFilesList = new ArrayList<>();
+        File currentDir = new File(FileSystems.getDefault().getPath(".").toAbsolutePath().toString());
+        for(File file : currentDir.listFiles()){
+            if(file.getName().endsWith(".ttl")){
+                originalFilesList.add(file.getAbsolutePath());
+            }
+        }
 
         List<String> smallFiles = new ArrayList<>();
-        for (String originalFile : originalFiles) {
+        for (String originalFile : originalFilesList) {
             Model model = Util.getModelFromFile(originalFile, Util.TRIPLE_AMOUNT);
             String small = Util.appendStringToFileName(originalFile, "_small");
             File smallFile = new File(small);
@@ -144,10 +152,19 @@ public class CompressionEvaluator {
         final String ontology = "dbpedia_2015-04.owl";
 
         evaluateCompression(dataFiles, resultFiles.get(0));
-
+        System.out.println("Finished original compr");
         evaluateEuivReplacement(dataFiles, ontology, resultFiles.get(1));
+        System.out.println("Finished euivalence compr");
         evaluateSymmetricMaterialization(dataFiles, ontology, resultFiles.get(2));
+        System.out.println("Finished symmetrical compr");
         evaluateTransitiveDeMaterialization(dataFiles, ontology, resultFiles.get(3));
+        System.out.println("Finished transitive compr");
+
+
+        // clean up
+        for(String dataFile : dataFiles){
+            new File(dataFile).delete();
+        }
 
     }
 }
