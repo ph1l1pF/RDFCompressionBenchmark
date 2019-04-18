@@ -72,7 +72,7 @@ public class DataReplacer {
 
             String sparql = "DELETE { ?s ?p ?o}\n" +
                     "WHERE { \n" +
-                    "?s ?p{2,} ?o.\n"+
+                    "?s ?p{2,} ?o\n"+
             "FILTER (?p = <" + pred + ">) \n}";
 
 

@@ -5,6 +5,7 @@ import compressionHandling.CompressionResult;
 import compressionHandling.CompressionStarter;
 import compressionHandling.GraphRePairStarter;
 import org.apache.jena.rdf.model.Model;
+import org.apache.jena.riot.RiotException;
 
 import java.io.File;
 import java.io.IOException;
@@ -33,6 +34,7 @@ public class CompressionEvaluator {
         }
 
         evaluateCompression(filesManipulated, fileResult);
+        System.out.println("Finished euivalence compr");
     }
 
     private static void evaluateSymmetricMaterialization(List<String> files, String ontology, File fileResult) {
@@ -50,6 +52,7 @@ public class CompressionEvaluator {
         }
 
         evaluateCompression(filesManipulated, fileResult);
+        System.out.println("Finished symmetrical compr");
     }
 
     private static void evaluateTransitiveDeMaterialization(List<String> files, String ontology, File fileResult) {
@@ -67,6 +70,7 @@ public class CompressionEvaluator {
         }
 
         evaluateCompression(filesManipulated, fileResult);
+        System.out.println("Finished transitive compr");
     }
 
     private static void evaluateCompression(List<String> files, File fileResult) {
@@ -84,6 +88,7 @@ public class CompressionEvaluator {
             }
             appendStringToFile(fileResult, result.toString());
         }
+
     }
 
     private static void appendStringToFile(File file, String string) {
@@ -131,7 +136,13 @@ public class CompressionEvaluator {
 
         List<String> smallFiles = new ArrayList<>();
         for (String originalFile : originalFilesList) {
-            Model model = Util.getModelFromFile(originalFile, Util.TRIPLE_AMOUNT);
+            Model model=null;
+            try {
+                 model = Util.getModelFromFile(originalFile, Util.TRIPLE_AMOUNT);
+            }catch (RiotException e){
+                System.out.println("RiotExpection in file "+originalFile);
+                continue;
+            }
             String small = Util.appendStringToFileName(originalFile, "_small");
             File smallFile = new File(small);
             Util.writeModelToFile(smallFile, model);
@@ -152,14 +163,9 @@ public class CompressionEvaluator {
         final String ontology = "dbpedia_2015-04.owl";
 
         evaluateCompression(dataFiles, resultFiles.get(0));
-        System.out.println("Finished original compr");
         evaluateEuivReplacement(dataFiles, ontology, resultFiles.get(1));
-        System.out.println("Finished euivalence compr");
         evaluateSymmetricMaterialization(dataFiles, ontology, resultFiles.get(2));
-        System.out.println("Finished symmetrical compr");
         evaluateTransitiveDeMaterialization(dataFiles, ontology, resultFiles.get(3));
-        System.out.println("Finished transitive compr");
-
 
         // clean up
         for(String dataFile : dataFiles){
