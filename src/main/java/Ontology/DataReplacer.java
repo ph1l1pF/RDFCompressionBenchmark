@@ -3,14 +3,12 @@ package Ontology;
 import org.apache.jena.query.ResultSet;
 import org.apache.jena.rdf.model.Model;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class DataReplacer {
 
     public static int replaceAllEquivalentPredicates(Model model, Map<String, List<String>> euivalenceMapping) {
+
         int count = 0;
         for (String strKey : euivalenceMapping.keySet()) {
             for (String strValue : euivalenceMapping.get(strKey)) {
@@ -37,6 +35,31 @@ public class DataReplacer {
     }
 
     public static int materializeAllSymmetricPredicates(Model model, List<String> predicates) {
+        // find equivalent wikidata-predicates
+        LinkedHashMap<String, List<String>> map = QueryExecutor.getAllPredicateEuivClassesWithBinaryProperty(model, "");
+        LinkedHashMap<String, String> mapDBPediaToWikiData = new LinkedHashMap<>();
+
+
+        outer :for(String pred : map.keySet()){
+            for(String pred2 : map.get(pred)){
+                if(pred2.toString().contains("wikidata")){ //TODO: passt das?
+                    mapDBPediaToWikiData.put(pred,pred2);
+                    continue outer;
+                }
+            }
+        }
+
+        for(String dbPediaPredicate : mapDBPediaToWikiData.keySet()){
+            String wikiDataPredicate  = mapDBPediaToWikiData.get(dbPediaPredicate);
+
+            // check if the wikiDataPredicate is symmetric
+            String sparql = "";
+            Model wikiDataOnt = Util.Util.getModelFromFile("");
+            QueryExecutor.executeSparql(wikiDataOnt, sparql,true);
+
+
+        }
+
 
         int count = 0;
         for (String pred : predicates) {

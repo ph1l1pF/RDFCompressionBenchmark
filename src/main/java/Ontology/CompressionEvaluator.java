@@ -129,7 +129,7 @@ public class CompressionEvaluator {
         List<String> originalFilesList = new ArrayList<>();
         File currentDir = new File(FileSystems.getDefault().getPath(".").toAbsolutePath().toString());
         for(File file : currentDir.listFiles()){
-            if(file.getName().endsWith(".ttl")){
+            if(file.getName().endsWith(".ttl") && !file.getName().startsWith("output")){
                 originalFilesList.add(file.getAbsolutePath());
             }
         }

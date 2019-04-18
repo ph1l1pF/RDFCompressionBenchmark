@@ -67,14 +67,14 @@ public class QueryExecutor {
     }
 
 
-    public static LinkedHashMap<String, List<String>> getAllPredicateEuivClassesWithBinaryProperty(Model ontology, String property){
+    public static LinkedHashMap<String, List<String>> getAllPredicateEuivClassesWithBinaryProperty(Model model, String property){
         String sparql = "select ?p1 ?p2\n" +
                 "where{\n" +
                 "   ?p1 <"+property+"> ?p2\n" +
                 "}";
 
         LinkedHashMap<String, List<String>> mapEquivalences = new LinkedHashMap<>();
-        ResultSet resultSet = QueryExecutor.executeSparql(ontology, sparql, true);
+        ResultSet resultSet = QueryExecutor.executeSparql(model, sparql, true);
         while (resultSet.hasNext()) {
             QuerySolution next = resultSet.next();
             String key = next.get("?p1").toString();
