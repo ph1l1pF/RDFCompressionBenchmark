@@ -55,6 +55,12 @@ public class GraphRePairStarter implements CompressionStarter {
             }
         }
 
+        try {
+            FileUtils.deleteDirectory(directoryOutput);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
 
         return new CompressionResult(originalSize, compressedSize, dictionarySize, compressionTime, -1, inputFile.getAbsolutePath());
     }

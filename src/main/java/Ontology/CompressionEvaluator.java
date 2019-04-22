@@ -32,8 +32,25 @@ public class CompressionEvaluator {
             filesManipulated.add(fileManipulated.getAbsolutePath());
         }
 
-        evaluateCompression(filesManipulated, fileResult);
+        evaluateCompression(filesManipulated, fileResult,true);
         System.out.println("Finished euivalence compr");
+    }
+
+    private static void evaluateInverseMaterialization(List<String> files, String ontology, File fileResult) {
+        List<String> filesManipulated = new ArrayList<>();
+        for (String fileOriginal : files) {
+            Model model = Util.getModelFromFile(fileOriginal);
+            int numReplacements = DataReplacer.materializeAllInverseDBPediaPredicates(model,Util.getModelFromFile(ontology));
+
+            Util.appendStringToFile(fileResult, "# inverse replacements in file " + fileOriginal + " : " + numReplacements);
+
+            File fileManipulated = new File(fileOriginal + ".inv.ttl");
+            Util.writeModelToFile(fileManipulated, model);
+            filesManipulated.add(fileManipulated.getAbsolutePath());
+        }
+
+        evaluateCompression(filesManipulated, fileResult,true);
+        System.out.println("Finished inverse compr");
     }
 
     private static void evaluateSymmetricMaterialization(List<String> files, String ontology, File fileResult) {
@@ -50,7 +67,7 @@ public class CompressionEvaluator {
             filesManipulated.add(fileManipulated.getAbsolutePath());
         }
 
-        evaluateCompression(filesManipulated, fileResult);
+        evaluateCompression(filesManipulated, fileResult,true);
         System.out.println("Finished symmetrical compr");
     }
 
@@ -67,25 +84,31 @@ public class CompressionEvaluator {
             filesManipulated.add(fileManipulated.getAbsolutePath());
         }
 
-        evaluateCompression(filesManipulated, fileResult);
+        evaluateCompression(filesManipulated, fileResult,true);
         System.out.println("Finished transitive compr");
     }
 
-    private static void evaluateCompression(List<String> files, File fileResult) {
+    private static void evaluateCompression(List<String> files, File fileResult, boolean deleteFiles) {
         final boolean addDictSize = false;
 
         CompressionStarter cs = new GraphRePairStarter();
-        for (String fileOriginal : files) {
+        for (String file : files) {
             CompressionResult result;
             try {
-                String[] split = fileOriginal.split("/");
+                String[] split = file.split("/");
                 result = cs.compress(split[split.length-1], null, addDictSize);
             } catch (Exception | OutOfMemoryError e) {
-                Util.appendStringToFile(fileResult, "\n Error with file " + fileOriginal + " : " + e.toString() + "\n");
+                Util.appendStringToFile(fileResult, "\n Error with file " + file + " : " + e.toString() + "\n");
                 continue;
             }
             Util.appendStringToFile(fileResult, result.toString());
+
+            if(deleteFiles){
+                new File(file).delete();
+            }
         }
+
+
 
     }
 
@@ -101,6 +124,7 @@ public class CompressionEvaluator {
         resultFiles.add(new File(dirResults.getName() + "/equivalence_results.txt"));
         resultFiles.add(new File(dirResults.getName() + "/symmetrie_results.txt"));
         resultFiles.add(new File(dirResults.getName() + "/transitive_results.txt"));
+        resultFiles.add(new File(dirResults.getName() + "/inverse_results.txt"));
 
         for (File file : resultFiles) {
             if (file.exists()) {
@@ -157,13 +181,16 @@ public class CompressionEvaluator {
         List<String> dataFiles = prepareDataFiles();
         final String ontology = "dbpedia_2015-04.owl";
 
-        DataReplacer.getWikiResults(Util.getModelFromFile(ontology));
+        DataReplacer.getWikiResults(ontology);
 
 
-        evaluateCompression(dataFiles, resultFiles.get(0));
-//        evaluateEuivReplacement(dataFiles, ontology, resultFiles.get(1));
+        evaluateCompression(dataFiles, resultFiles.get(0),false);
+        evaluateEuivReplacement(dataFiles, ontology, resultFiles.get(1));
         evaluateSymmetricMaterialization(dataFiles, ontology, resultFiles.get(2));
-//        evaluateTransitiveDeMaterialization(dataFiles, ontology, resultFiles.get(3));
+        evaluateTransitiveDeMaterialization(dataFiles, ontology, resultFiles.get(3));
+        evaluateInverseMaterialization(dataFiles, ontology, resultFiles.get(4));
+
+
 
         // clean up
         for(String dataFile : dataFiles){

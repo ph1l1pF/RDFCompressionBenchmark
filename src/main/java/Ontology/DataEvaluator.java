@@ -3,7 +3,6 @@ package Ontology;
 import Util.Util;
 import org.apache.jena.rdf.model.Model;
 
-import java.io.File;
 import java.util.*;
 
 public class DataEvaluator {
@@ -11,7 +10,7 @@ public class DataEvaluator {
     public static long countTriplesWithPredicates(Model data, List<String> predicates){
         long numTriples = 0;
         for(String predicate : predicates){
-            numTriples+=QueryExecutor.countTriplesContainingPredicate(data,predicate);
+            numTriples+=SparqlExecutor.countTriplesContainingPredicate(data,predicate);
         }
         return numTriples;
     }

@@ -4,11 +4,9 @@ package Ontology;
 import Util.Util;
 import compressionHandling.CompressionResult;
 import compressionHandling.GraphRePairStarter;
-import org.apache.jena.graph.Triple;
 import org.apache.jena.query.*;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.update.UpdateAction;
-import org.apache.jena.util.iterator.ExtendedIterator;
 
 import java.io.File;
 import java.io.IOException;
@@ -18,7 +16,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 
-public class QueryExecutor {
+public class SparqlExecutor {
 
 
     public static ResultSet executeSparql(Model model, String sparql, boolean isQuery) {
@@ -35,10 +33,11 @@ public class QueryExecutor {
         }
     }
 
-    public static int getCount(Model model, String sparql){
+
+    public static int getCount(Model model, String sparql) {
         ResultSet resultSet = executeSparql(model, sparql, true);
-        int count=0;
-        while (resultSet.hasNext()){
+        int count = 0;
+        while (resultSet.hasNext()) {
             resultSet.next();
             count++;
         }
@@ -46,13 +45,13 @@ public class QueryExecutor {
     }
 
 
-    public static List<String> getAllPredicatesWithUnaryProperty(Model ontology, String property){
+    public static List<String> getAllPredicatesWithUnaryProperty(Model ontology, String property) {
         String spaqrl = "select ?p1" +
                 "where {" +
                 "?p1 <" + property + "> ?o" +
                 "}";
 
-        ResultSet rs = QueryExecutor.executeSparql(ontology, spaqrl, true);
+        ResultSet rs = SparqlExecutor.executeSparql(ontology, spaqrl, true);
         List<String> predicates = new ArrayList<>();
         while (rs.hasNext()) {
             QuerySolution next = rs.next();
@@ -62,19 +61,19 @@ public class QueryExecutor {
         return predicates;
     }
 
-    public static int countAllPredicatesWithUnaryProperty(Model ontology, String property){
-        return getAllPredicatesWithUnaryProperty(ontology,property).size();
+    public static int countAllPredicatesWithUnaryProperty(Model ontology, String property) {
+        return getAllPredicatesWithUnaryProperty(ontology, property).size();
     }
 
 
-    public static LinkedHashMap<String, List<String>> getAllPredicateEuivClassesWithBinaryProperty(Model model, String property){
+    public static LinkedHashMap<String, List<String>> getAllPredicateEuivClassesWithBinaryProperty(Model model, String property) {
         String sparql = "select ?p1 ?p2\n" +
                 "where{\n" +
-                "   ?p1 <"+property+"> ?p2\n" +
+                "   ?p1 <" + property + "> ?p2\n" +
                 "}";
 
         LinkedHashMap<String, List<String>> mapEquivalences = new LinkedHashMap<>();
-        ResultSet resultSet = QueryExecutor.executeSparql(model, sparql, true);
+        ResultSet resultSet = SparqlExecutor.executeSparql(model, sparql, true);
         while (resultSet.hasNext()) {
             QuerySolution next = resultSet.next();
             String key = next.get("?p1").toString();
@@ -92,18 +91,18 @@ public class QueryExecutor {
         return mapEquivalences;
     }
 
-    public static int countAllPredicateEuivClassesWithBinaryProperty(Model ontology, String property){
-        return getAllPredicateEuivClassesWithBinaryProperty(ontology,property).size();
+    public static int countAllPredicateEuivClassesWithBinaryProperty(Model ontology, String property) {
+        return getAllPredicateEuivClassesWithBinaryProperty(ontology, property).size();
     }
 
-    public static long countTriplesContainingPredicate(Model data, String predicate){
+    public static long countTriplesContainingPredicate(Model data, String predicate) {
         String spaqrl = "select ?s ?p1 ?o \n" +
                 "where {\n" +
                 "?s <" + predicate + "> ?o \n" +
                 "}";
 
-        ResultSet rs = QueryExecutor.executeSparql(data, spaqrl, true);
-        long numTriples=0;
+        ResultSet rs = SparqlExecutor.executeSparql(data, spaqrl, true);
+        long numTriples = 0;
         while (rs.hasNext()) {
             rs.next();
             numTriples++;
@@ -112,10 +111,9 @@ public class QueryExecutor {
     }
 
 
-
-    public static void main(String[] args)  {
+    public static void main(String[] args) {
         File file = new File("latestResults.txt");
-        if(file.exists()){
+        if (file.exists()) {
             file.delete();
         }
 
@@ -132,10 +130,11 @@ public class QueryExecutor {
             CompressionResult result = graphRePairStarter.compress(newName, null, true);
 
             Files.write(Paths.get(file.getAbsolutePath()), result.toString().getBytes());
-        }catch(OutOfMemoryError e){
+        } catch (OutOfMemoryError e) {
             try {
                 Files.write(Paths.get(file.getAbsolutePath()), e.toString().getBytes());
-            } catch (IOException e1) { }
+            } catch (IOException e1) {
+            }
 
             System.out.println("error written to file");
         } catch (IOException e) {

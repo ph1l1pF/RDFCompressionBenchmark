@@ -1,10 +1,7 @@
 package Ontology;
 
-import org.apache.jena.query.QuerySolution;
-import org.apache.jena.query.ResultSet;
 import org.apache.jena.rdf.model.Model;
 
-import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 
@@ -19,15 +16,15 @@ public class OntologyEvaluator {
 
 
     public static List<String> getAllSymmetricPredicates(Model ontology) {
-        return QueryExecutor.getAllPredicatesWithUnaryProperty(ontology,SYMMETRIC_PROPERTY);
+        return SparqlExecutor.getAllPredicatesWithUnaryProperty(ontology,SYMMETRIC_PROPERTY);
     }
 
     public static List<String> getAllTransitivePredicates(Model ontology) {
-        return QueryExecutor.getAllPredicatesWithUnaryProperty(ontology,TRANSITIVE_PROPERTY);
+        return SparqlExecutor.getAllPredicatesWithUnaryProperty(ontology,TRANSITIVE_PROPERTY);
     }
 
     public static LinkedHashMap<String, List<String>> getAllEuivalentProperties(Model ontology){
-        return QueryExecutor.getAllPredicateEuivClassesWithBinaryProperty(ontology, EUIVALENT_PROPERTIES);
+        return SparqlExecutor.getAllPredicateEuivClassesWithBinaryProperty(ontology, EUIVALENT_PROPERTIES);
     }
 
     public static void main(String[] args){

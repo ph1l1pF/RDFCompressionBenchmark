@@ -7,13 +7,16 @@ import org.apache.jena.util.iterator.ExtendedIterator;
 import org.apache.jena.vocabulary.OWL;
 import org.apache.jena.vocabulary.RDF;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class WikiDataHandler {
+public class WikiDataHandler implements Serializable {
 
     private static final String TRANSITIVE_PROPERTY = "Q18647515";
     private static final String SYMMETRIC_PROPERTY = "Q21510862";
+    private static final String INVERSE_PROPERTY = "P1696";
+
 
 
     public static Result getResultForPredicate(String predDBPedia, String predWikiData) {
@@ -37,6 +40,7 @@ public class WikiDataHandler {
                         retrievedModel.read(eqProp.asResource().getURI());
                     }catch (RiotNotFoundException e){
                         // resource not found in wiki data => continue
+                        System.out.println("--------\n raaaalf\n");
                         return null;
                     }
                     // process info from Wikidata, e.g., inverse property
@@ -59,6 +63,9 @@ public class WikiDataHandler {
                             ontology.add(dbpProp, RDF.type, OWL.TransitiveProperty);
                             result.setTransitive(true);
                         }
+                        else if(triple.getPredicate().toString().contains(INVERSE_PROPERTY)){
+                            result.getInverseProperties().add(triple.getObject().toString());
+                        }
                     }
 
                 }
@@ -68,7 +75,7 @@ public class WikiDataHandler {
     }
 
 
-    public static class Result{
+    public static class Result implements Serializable{
         private List<String> inverseProperties = new ArrayList<>();
         private boolean isSymmetric=false;
         private boolean isTransitive=false;
