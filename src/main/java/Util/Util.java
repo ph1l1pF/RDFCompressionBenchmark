@@ -15,6 +15,8 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -27,7 +29,7 @@ public class Util {
 
     private static final int TRIPLE_COMPONENT_LENGTH = 10;
 
-    public static final int TRIPLE_AMOUNT = 200000;
+    public static final int TRIPLE_AMOUNT = 300;
 
     private static Random r = new Random();
 
@@ -83,8 +85,10 @@ public class Util {
 
 
 
-//        StreamRDFBase destination = new Stream();
+//        StreamRDFBase destination = new StreamRDFBase();
 //        RDFDataMgr.parse(destination, filePath) ;
+//
+//        destination.
 
 
         Graph g = GraphFactory.createDefaultGraph();
@@ -117,7 +121,8 @@ public class Util {
             int count = 0;
             int size = model.getGraph().size();
             ExtendedIterator<org.apache.jena.graph.Triple> tripleExtendedIterator = model.getGraph().find();
-            while (1.0 * count / size <= percentage && tripleExtendedIterator.hasNext()) {
+
+            while (1.0 * count / size <= percentage) {
                 g.add(tripleExtendedIterator.next());
                 count++;
             }
@@ -163,6 +168,15 @@ public class Util {
         }
     }
 
+    public static void appendStringToFile(File file, String string) {
+        String s = string + "\n";
+        try {
+            java.nio.file.Files.write(Paths.get(file.getAbsolutePath()), s.getBytes(), StandardOpenOption.APPEND);
+        } catch (IOException e) {
+            // will not happen
+            e.printStackTrace();
+        }
+    }
 
     public static List<File> getAllFileRecursively(String dirPath, String[] allowedSuffices) {
         File dir = new File(dirPath);

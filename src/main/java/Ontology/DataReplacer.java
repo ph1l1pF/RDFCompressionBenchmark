@@ -1,11 +1,13 @@
 package Ontology;
 
-import org.apache.jena.query.ResultSet;
 import org.apache.jena.rdf.model.Model;
 
 import java.util.*;
 
 public class DataReplacer {
+
+    private static final Map<String, WikiDataHandler.Result> mapPredToResult = new LinkedHashMap<>();
+
 
     public static int replaceAllEquivalentPredicates(Model model, Map<String, List<String>> euivalenceMapping) {
 
@@ -34,15 +36,15 @@ public class DataReplacer {
         return count;
     }
 
-    public static int materializeAllSymmetricPredicates(Model model, List<String> predicates) {
+    public static void getWikiResults(Model ontologyDBPedia){
         // find equivalent wikidata-predicates
-        LinkedHashMap<String, List<String>> map = QueryExecutor.getAllPredicateEuivClassesWithBinaryProperty(model, "");
+        LinkedHashMap<String, List<String>> map = QueryExecutor.getAllPredicateEuivClassesWithBinaryProperty(ontologyDBPedia, OntologyEvaluator.EUIVALENT_PROPERTIES);
         LinkedHashMap<String, String> mapDBPediaToWikiData = new LinkedHashMap<>();
 
 
         outer :for(String pred : map.keySet()){
             for(String pred2 : map.get(pred)){
-                if(pred2.toString().contains("wikidata")){ //TODO: passt das?
+                if(pred2.contains("http://www.wikidata.org")){
                     mapDBPediaToWikiData.put(pred,pred2);
                     continue outer;
                 }
@@ -53,16 +55,28 @@ public class DataReplacer {
             String wikiDataPredicate  = mapDBPediaToWikiData.get(dbPediaPredicate);
 
             // check if the wikiDataPredicate is symmetric
-            String sparql = "";
-            Model wikiDataOnt = Util.Util.getModelFromFile("");
-            QueryExecutor.executeSparql(wikiDataOnt, sparql,true);
-
-
+            WikiDataHandler.Result result = WikiDataHandler.getResultForPredicate(dbPediaPredicate, wikiDataPredicate);
+            mapPredToResult.put(dbPediaPredicate, result);
         }
 
+    }
 
+    public static int materializeAllSymmetricDBPediaPredicates(Model model, Model ontologyDBPedia) {
+
+
+        List<String> symmetricPredicates = new ArrayList<>();
+        for(String pred : mapPredToResult.keySet()){
+            if(mapPredToResult.get(pred)!=null && mapPredToResult.get(pred).isSymmetric()){
+                symmetricPredicates.add(pred);
+            }
+        }
+
+        return materializeSymmetry(symmetricPredicates,  model);
+    }
+
+    public static int materializeSymmetry(List<String> symmetricPredicates, Model model){
         int count = 0;
-        for (String pred : predicates) {
+        for (String pred : symmetricPredicates) {
 
             String sparql = "SELECT ?s ?p ?o {\n" +
                     "    ?s <" + pred + "> ?o\n" +
@@ -78,25 +92,31 @@ public class DataReplacer {
                     "}";
 
             QueryExecutor.executeSparql(model, sparql, false);
-
-
         }
         return count;
     }
 
 
-    public static int dematerializeAllTransitivePredicates(Model model, List<String> predicates) {
-        //TODO: not working yet
-        for (String pred : predicates) {
-//            String sparql = "DELETE { ?s <" + pred + "> ?o}\n" +
-//                    "WHERE { \n" +
-//                    "?s <" + pred + ">{2,} ?o.\n}";
-////                    "?s <"+pred+"> ?o }";
+    public static int dematerializeAllTransitivePredicates(Model model) {
 
-            String sparql = "DELETE { ?s ?p ?o}\n" +
+        List<String> transPredicates = new ArrayList<>();
+        for(String pred : mapPredToResult.keySet()){
+            if(mapPredToResult.get(pred)!=null && mapPredToResult.get(pred).isTransitive()){
+                transPredicates.add(pred);
+            }
+        }
+
+        //TODO: not working yet
+        for (String pred : transPredicates) {
+            String sparql = "DELETE { ?s <" + pred + "> ?o}\n" +
                     "WHERE { \n" +
-                    "?s ?p{2,} ?o\n"+
-            "FILTER (?p = <" + pred + ">) \n}";
+                    "?s <" + pred + ">{2,} ?o.\n"+
+                    "?s <"+pred+"> ?o }";
+
+//            String sparql = "DELETE { ?s ?p ?o}\n" +
+//                    "WHERE { \n" +
+//                    "?s ?p{2,} ?o\n"+
+//            "FILTER (?p = <" + pred + ">) \n}";
 
 
             QueryExecutor.executeSparql(model, sparql, false);
@@ -106,14 +126,16 @@ public class DataReplacer {
     }
 
     public static void main(String[] args) {
-        Model m = Util.Util.getModelFromFile("testfile.ttl");
+        Model m = Util.Util.getModelFromFile("file.ttl", 0.01);
+        Model ontology = Util.Util.getModelFromFile("dbpedia_2015-04.owl");
 
-        Util.Util.printModel(m);
+        getWikiResults(ontology);
 
-        List<String> p = new ArrayList<>();
-        p.add("http://5");
-//        materializeAllSymmetricPredicates(m,p);
-        dematerializeAllTransitivePredicates(m,p);
+//        List<String> p = new ArrayList<>();
+//        p.add("http://5");
+        materializeAllSymmetricDBPediaPredicates(m,ontology);
+        dematerializeAllTransitivePredicates(m);
+//        dematerializeAllTransitivePredicates(m,p);
 
 //
 //        Map<String, List<String>> euivalenceMapping = new HashMap<>();

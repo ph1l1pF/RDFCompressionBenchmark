@@ -14,7 +14,7 @@ public class OntologyEvaluator {
     public static final String SYMMETRIC_PROPERTY = "???";
     public static final String TRANSITIVE_PROPERTY = "???";
 
-    private static final String EUIVALENT_PROPERTIES = "http://www.w3.org/2002/07/owl#equivalentProperty";
+    public static final String EUIVALENT_PROPERTIES = "http://www.w3.org/2002/07/owl#equivalentProperty";
 
 
 
