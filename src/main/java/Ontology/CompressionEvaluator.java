@@ -177,6 +177,8 @@ public class CompressionEvaluator {
 
     public static void main(String[] args) throws IOException {
 
+        double time = System.currentTimeMillis();
+
         List<File> resultFiles = prepareResultFiles();
         List<String> dataFiles = prepareDataFiles();
         final String ontology = "dbpedia_2015-04.owl";
@@ -197,5 +199,8 @@ public class CompressionEvaluator {
             new File(dataFile).delete();
         }
 
+        time = System.currentTimeMillis()-time;
+        time = time /1000.0/60/60;
+        Util.sendMail(time);
     }
 }

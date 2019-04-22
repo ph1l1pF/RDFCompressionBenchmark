@@ -11,15 +11,18 @@ import org.apache.jena.riot.system.StreamRDFBase;
 import org.apache.jena.sparql.graph.GraphFactory;
 import org.apache.jena.util.iterator.ExtendedIterator;
 
+import javax.mail.*;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeBodyPart;
+import javax.mail.internet.MimeMessage;
+import javax.mail.internet.MimeMultipart;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 public class Util {
 
@@ -231,6 +234,45 @@ public class Util {
         newName+=string+".";
         newName+=split[split.length-1];
         return newName;
+    }
+
+    public static void sendMail(double time) {
+        try {
+
+            Properties prop = new Properties();
+            prop.put("mail.smtp.auth", true);
+            prop.put("mail.smtp.starttls.enable", "true");
+            prop.put("mail.smtp.host", "mail.gmx.net");
+            prop.put("mail.smtp.port", "587");
+            prop.put("mail.smtp.ssl.trust", "mail.gmx.net");
+
+            Session session = Session.getInstance(prop, new Authenticator() {
+                @Override
+                protected PasswordAuthentication getPasswordAuthentication() {
+                    return new PasswordAuthentication("p.gymheepen@gmx.de", "logitech55");
+                }
+            });
+
+            Message message = new MimeMessage(session);
+            message.setFrom(new InternetAddress("p.gymheepen@gmx.de"));
+            message.setRecipients(
+                    Message.RecipientType.TO, InternetAddress.parse("philip.frerk@gmail.com"));
+            message.setSubject("Computation done");
+
+            String msg = "It took " + time + " hours and finished at " + new Date();
+
+            MimeBodyPart mimeBodyPart = new MimeBodyPart();
+            mimeBodyPart.setContent(msg, "text/html");
+
+            Multipart multipart = new MimeMultipart();
+            multipart.addBodyPart(mimeBodyPart);
+
+            message.setContent(multipart);
+
+            Transport.send(message);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
     }
 
 }
