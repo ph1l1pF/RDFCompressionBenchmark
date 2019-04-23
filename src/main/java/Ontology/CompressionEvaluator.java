@@ -197,7 +197,7 @@ public class CompressionEvaluator {
         DataReplacer.getWikiResults(ontology);
 
         evaluateCompression(dataFiles, resultFiles.get(0),false);
-        evaluateEuivReplacement(dataFiles, ontology, resultFiles.get(1));
+//        evaluateEuivReplacement(dataFiles, ontology, resultFiles.get(1));
         evaluateSymmetricMaterialization(dataFiles, ontology, resultFiles.get(2));
         evaluateTransitiveDeMaterialization(dataFiles, ontology, resultFiles.get(3));
         evaluateInverseMaterialization(dataFiles, ontology, resultFiles.get(4));

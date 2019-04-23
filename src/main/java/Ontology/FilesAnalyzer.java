@@ -22,7 +22,7 @@ public class FilesAnalyzer {
         inv.put("http://dbpedia.org/ontology/spouse" , "http://dbpedia.org/ontology/spouse");
         Map<File, Integer> fileCount = new HashMap<>();
 
-        String dir = "/Users/philipfrerk/Downloads/NeuerOrdner";
+        String dir = "/Users/philipfrerk/Downloads/";
 
         for(File file : new File(dir).listFiles()) {
 
@@ -51,7 +51,6 @@ public class FilesAnalyzer {
                         fileCount.put(file, count);
                     }
 
-                    System.out.println(line);
 
                     line = bufferedReader.readLine();
                 }
