@@ -113,7 +113,6 @@ public class CompressionEvaluator {
     }
 
 
-
     private static List<File> prepareResultFiles() throws IOException {
         File dirResults = new File("Latest_Results");
         if (!dirResults.exists()) {
@@ -148,11 +147,23 @@ public class CompressionEvaluator {
                 file.delete();
             }
         }
-        for(File file : currentDir.listFiles()){
-            if(file.getName().endsWith(".ttl") && !file.getName().startsWith("output")&& !file.getName().contains("small")){
-                originalFilesList.add(file.getAbsolutePath());
+
+        boolean hardCodedFiles = true;
+
+        if(hardCodedFiles){
+            String[] files = new String[]{"mappingbased-properties_en.ttl"};
+            for(String file : files){
+                originalFilesList.add(file);
+            }
+        }else{
+            for(File file : currentDir.listFiles()){
+                if(file.getName().endsWith(".ttl") && !file.getName().startsWith("output")&& !file.getName().contains("small")){
+                    originalFilesList.add(file.getAbsolutePath());
+                }
             }
         }
+
+
 
         List<String> smallFiles = new ArrayList<>();
         for (String originalFile : originalFilesList) {
@@ -184,7 +195,6 @@ public class CompressionEvaluator {
         final String ontology = "dbpedia_2015-04.owl";
 
         DataReplacer.getWikiResults(ontology);
-
 
         evaluateCompression(dataFiles, resultFiles.get(0),false);
         evaluateEuivReplacement(dataFiles, ontology, resultFiles.get(1));

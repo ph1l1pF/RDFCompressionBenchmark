@@ -1,6 +1,7 @@
 package Ontology;
 
 import Util.Triple;
+import Util.Util;
 import org.apache.jena.query.QuerySolution;
 import org.apache.jena.query.ResultSet;
 import org.apache.jena.rdf.model.Model;
@@ -57,7 +58,7 @@ public class DataReplacer {
 
 
             // find equivalent wikidata-predicates
-            LinkedHashMap<String, List<String>> map = SparqlExecutor.getAllPredicateEuivClassesWithBinaryProperty(Util.Util.getModelFromFile(ontologyDBPedia), OntologyEvaluator.EUIVALENT_PROPERTIES);
+            LinkedHashMap<String, List<String>> map = SparqlExecutor.getAllPredicateEuivClassesWithBinaryProperty(Util.getModelFromFile(ontologyDBPedia), OntologyEvaluator.EUIVALENT_PROPERTIES);
             LinkedHashMap<String, List<String>> mapDBPediaToWikiData = new LinkedHashMap<>();
 
 
@@ -104,6 +105,11 @@ public class DataReplacer {
             }
         }
 
+        for (String s : mapPredToResult.keySet()) {
+            if (mapPredToResult.get(s) != null && !mapPredToResult.get(s).getInverseProperties().isEmpty()) {
+                System.out.println(s + " : " + mapPredToResult.get(s).getInverseProperties());
+            }
+        }
     }
 
     public static int materializeAllSymmetricDBPediaPredicates(Model model, Model ontologyDBPedia) {
@@ -124,16 +130,41 @@ public class DataReplacer {
 
         Map<String, String> invPredicates = new HashMap<>();
 
-        for (String pred : mapPredToResult.keySet()) {
-            if(mapPredToResult.get(pred)==null){
+        LinkedHashMap<String, List<String>> euivalentProperties = OntologyEvaluator.getAllEuivalentProperties(ontologyDBPedia);
+
+        for (String predDBPedia : mapPredToResult.keySet()) {
+            if (mapPredToResult.get(predDBPedia) == null) {
                 continue;
             }
-            for (String invPred : mapPredToResult.get(pred).getInverseProperties()) {
-                invPredicates.put(pred, invPred);
+
+
+            String dbPediaInverse = null;
+            for (String invPredWiki : mapPredToResult.get(predDBPedia).getInverseProperties()) {
+                if(findDBPredicateForWikiPredicate(invPredWiki,euivalentProperties)!=null){
+                    dbPediaInverse = findDBPredicateForWikiPredicate(invPredWiki,euivalentProperties);
+                    break;
+                }
             }
+            if(dbPediaInverse!=null){
+                invPredicates.put(predDBPedia, dbPediaInverse);
+            }
+
         }
 
         return materializeInverse(invPredicates, model);
+    }
+
+
+    private static String findDBPredicateForWikiPredicate(String wikiPred, LinkedHashMap<String, List<String>> euivalentProperties) {
+        for (String dbPred : euivalentProperties.keySet()) {
+            for (String wikiPr : euivalentProperties.get(dbPred)) {
+                if (wikiPr.equals(wikiPred)) {
+                    return dbPred;
+                }
+            }
+        }
+
+        return null;
     }
 
     private static int materializeInverse(Map<String, String> invPredicates, Model model) {
@@ -213,22 +244,22 @@ public class DataReplacer {
                     "?s <" + pred + ">/<" + pred + ">+ ?o.\n" +
                     "?s <" + pred + "> ?o }";
 
-            count+=SparqlExecutor.getCount(model,sparql);
+            count += SparqlExecutor.getCount(model, sparql);
 
-            sparql = "delete { ?s <"+pred+"> ?o }\n" +
+            sparql = "delete { ?s <" + pred + "> ?o }\n" +
                     "WHERE { \n" +
                     "?s <" + pred + ">/<" + pred + ">+ ?o.\n" +
                     "?s <" + pred + "> ?o }";
 
-            SparqlExecutor.executeSparql(model,sparql,false);
+            SparqlExecutor.executeSparql(model, sparql, false);
 
         }
         return count;
     }
 
     public static void main(String[] args) {
-        Model m = Util.Util.getModelFromFile("testFile.ttl");
-        Model ontology = Util.Util.getModelFromFile("dbpedia_2015-04.owl");
+        Model m = Util.getModelFromFile("testFile.ttl");
+        Model ontology = Util.getModelFromFile("dbpedia_2015-04.owl");
 
         getWikiResults("dbpedia_2015-04.owl");
 
@@ -242,15 +273,15 @@ public class DataReplacer {
 //        invPred.put("http://n1","http://i1");
 //        invPred.put("http://n2","http://i2");
 
-        List<String> tran = new ArrayList<>();
-        tran.add("http://n1");
+//        List<String> tran = new ArrayList<>();
+//        tran.add("http://n1");
+//
+//        Util.Util.printModel(m);
+//        System.out.println(dematerializeTransitive(tran, m));
+//        Util.Util.printModel(m);
 
-        Util.Util.printModel(m);
-        System.out.println(dematerializeTransitive(tran, m));
-        Util.Util.printModel(m);
 
-
-//        materializeAllInverseDBPediaPredicates(m,ontology);
+        materializeAllInverseDBPediaPredicates(m,ontology);
 
 
 //
