@@ -137,9 +137,6 @@ public class CompressionEvaluator {
 
     private static List<String> prepareDataFiles() {
 
-        // TODO: here add the files to evaluate
-//        String[] originalFiles = new String[]{"instance-types_en.ttl","persondata_en.ttl","external-links_en.ttl"};
-        List<String> originalFilesList = new ArrayList<>();
         File currentDir = new File(FileSystems.getDefault().getPath(".").toAbsolutePath().toString());
 
         for(File file : currentDir.listFiles()){
@@ -148,8 +145,8 @@ public class CompressionEvaluator {
             }
         }
 
-        boolean hardCodedFiles = true;
-
+        final boolean hardCodedFiles = true;
+        List<String> originalFilesList = new ArrayList<>();
         if(hardCodedFiles){
             String[] files = new String[]{"mappingbased-properties_en.ttl"};
             for(String file : files){
@@ -171,7 +168,7 @@ public class CompressionEvaluator {
             try {
                  model = Util.getModelFromFile(originalFile, Util.TRIPLE_AMOUNT);
             }catch (Exception e){
-                System.out.println("Expection in file "+originalFile);
+                System.out.println("Exception in file "+originalFile);
                 continue;
             }
             String small = Util.appendStringToFileName(originalFile, "_small");
