@@ -9,9 +9,6 @@ import org.apache.jena.rdf.model.Model;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.FileSystems;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -159,7 +156,6 @@ public class CompressionEvaluator {
                 }
             }
         }
-
 
 
         List<String> smallFiles = new ArrayList<>();
