@@ -32,7 +32,7 @@ public class Util {
 
     private static final int TRIPLE_COMPONENT_LENGTH = 10;
 
-    public static final int TRIPLE_AMOUNT = 5000000;
+    public static final int TRIPLE_AMOUNT = 1000000;
 
     private static Random r = new Random();
 
