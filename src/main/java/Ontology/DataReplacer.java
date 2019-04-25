@@ -261,7 +261,7 @@ public class DataReplacer {
         Model m = Util.getModelFromFile("testFile.ttl");
         Model ontology = Util.getModelFromFile("dbpedia_2015-04.owl");
 
-        getWikiResults("dbpedia_2015-04.owl");
+        getWikiResults("dbpedia_2016-10.owl");
 
 //        List<String> p = new ArrayList<>();
 //        p.add("http://5");

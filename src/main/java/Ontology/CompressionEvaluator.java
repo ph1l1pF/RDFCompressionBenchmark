@@ -145,7 +145,7 @@ public class CompressionEvaluator {
         final boolean hardCodedFiles = true;
         List<String> originalFilesList = new ArrayList<>();
         if(hardCodedFiles){
-            String[] files = new String[]{"mappingbased-properties_en.ttl"};
+            String[] files = new String[]{"mappingbased_objects_disjoint_domain_en.ttl"};
             for(String file : files){
                 originalFilesList.add(file);
             }
@@ -190,7 +190,7 @@ public class CompressionEvaluator {
         DataReplacer.getWikiResults(ontology);
 
         evaluateCompression(dataFiles, resultFiles.get(0),false);
-//        evaluateEuivReplacement(dataFiles, ontology, resultFiles.get(1));
+        evaluateEuivReplacement(dataFiles, ontology, resultFiles.get(1));
         evaluateSymmetricMaterialization(dataFiles, ontology, resultFiles.get(2));
         evaluateTransitiveDeMaterialization(dataFiles, ontology, resultFiles.get(3));
         evaluateInverseMaterialization(dataFiles, ontology, resultFiles.get(4));
