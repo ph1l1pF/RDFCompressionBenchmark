@@ -17,10 +17,11 @@ public class HDTStarter implements CompressionStarter {
 
     public HDTStarter() {
         final String NTRIPLES = "ntriples";
+        final String RDF_XML = "rdf-xml";
         mapSuffixToFormat.put("ttl", NTRIPLES);
         mapSuffixToFormat.put("nt", NTRIPLES);
         mapSuffixToFormat.put("inf", NTRIPLES);
-
+        mapSuffixToFormat.put("rdf", RDF_XML);
     }
 
     public CompressionResult compress(String filePath, String outputName, boolean addDictionarySizeToCompressedSize) {

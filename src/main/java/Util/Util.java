@@ -16,10 +16,7 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.*;
@@ -32,7 +29,7 @@ public class Util {
 
     private static final int TRIPLE_COMPONENT_LENGTH = 10;
 
-    public static final int TRIPLE_AMOUNT = 500000;
+    public static final int TRIPLE_AMOUNT = 10000;
 
     private static Random r = new Random();
 
@@ -87,12 +84,8 @@ public class Util {
         }
 
 
-
-//        StreamRDFBase destination = new StreamRDFBase();
-//        RDFDataMgr.parse(destination, filePath) ;
-//
-//        destination.
-
+        StreamRDFBase destination = new StreamRDFBase();
+        RDFDataMgr.parse(destination, filePath);
 
         Graph g = GraphFactory.createDefaultGraph();
         int count = 0;
@@ -107,7 +100,7 @@ public class Util {
 
     public static Model getModelFromFile(String filePath, double percentage) {
 
-        if(percentage<=0 || percentage>1){
+        if (percentage <= 0 || percentage > 1) {
             throw new IllegalArgumentException();
         }
 
@@ -133,10 +126,81 @@ public class Util {
         }
     }
 
-    public static void printModel(Model model){
+    public static Model streamModelFromFile(String file, int numTriples) {
+        return streamModelFromFile(file,numTriples,null);
+    }
+
+
+    public static Model streamModelFromFile(String file, int numTriples, List<String> desiredStrings) {
+        FileReader fi = null;
+        BufferedReader bufferedReader = null;
+        File tempfile = new File("tempFile.ttl");
+        tempfile.delete();
+
+        try {
+            fi = new FileReader(file);
+            bufferedReader = new BufferedReader(fi);
+
+            String line = bufferedReader.readLine();
+            List<String> lines = new ArrayList<>();
+
+            int i = 0;
+            while (line != null && i < numTriples) {
+                if(desiredStrings!=null){
+                    for(String desiredString : desiredStrings){
+                        if(line.contains(desiredString)){
+                            lines.add(line);
+                        }
+                    }
+                }else{
+                    lines.add(line);
+                }
+                line = bufferedReader.readLine();
+                i++;
+            }
+
+            // in case we have not enough lines yet
+            if(desiredStrings!=null && lines.size()<numTriples){
+                bufferedReader = new BufferedReader(fi);
+                line = bufferedReader.readLine();
+                while (line != null) {
+                    if(!lines.contains(line)) {
+                        lines.add(line);
+                    }
+                    line = bufferedReader.readLine();
+                }
+            }
+
+            StringBuilder sb = new StringBuilder();
+            for (int k = 0; k < lines.size() - 1; k++) {
+                sb.append(lines.get(k));
+                if (k < lines.size() - 2) {
+                    sb.append("\n");
+                }
+            }
+
+
+            Files.write(sb.toString().getBytes(), tempfile);
+            return getModelFromFile(tempfile.getAbsolutePath());
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        } finally {
+            try {
+                bufferedReader.close();
+                fi.close();
+//                tempfile.delete();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public static void printModel(Model model) {
         ExtendedIterator<org.apache.jena.graph.Triple> tripleExtendedIterator = model.getGraph().find();
         System.out.println("Model:");
-        while (tripleExtendedIterator.hasNext()){
+        while (tripleExtendedIterator.hasNext()) {
             System.out.println(tripleExtendedIterator.next());
         }
         System.out.println();
@@ -222,17 +286,17 @@ public class Util {
         return false;
     }
 
-    public static String appendStringToFileName(String fileName, String string){
+    public static String appendStringToFileName(String fileName, String string) {
         String[] split = fileName.split("\\.");
         String newName = "";
-        for (int i = 0; i < split.length-1; i++) {
-            newName+=split[i];
-            if(i<split.length-2){
-                newName+=".";
+        for (int i = 0; i < split.length - 1; i++) {
+            newName += split[i];
+            if (i < split.length - 2) {
+                newName += ".";
             }
         }
-        newName+=string+".";
-        newName+=split[split.length-1];
+        newName += string + ".";
+        newName += split[split.length - 1];
         return newName;
     }
 
@@ -270,9 +334,14 @@ public class Util {
             message.setContent(multipart);
 
             Transport.send(message);
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
+    public static void main(String[] agrs) {
+        Model modelFromFile = Util.streamModelFromFile("/Users/philipfrerk/Downloads/page-length_en.ttl", TRIPLE_AMOUNT);
+//        Model modelFromFile = getModelFromFile("tempFile.ttl");
+        writeModelToFile(new File("/Users/philipfrerk/Downloads/page-length_en_small.ttl"), modelFromFile);
+    }
 }
