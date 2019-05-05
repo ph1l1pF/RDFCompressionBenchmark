@@ -114,7 +114,6 @@ public class DataReplacer {
 
     public static int materializeAllSymmetricDBPediaPredicates(Model model, Model ontologyDBPedia) {
 
-
         List<String> symmetricPredicates = new ArrayList<>();
         for (String pred : mapPredToResult.keySet()) {
             if (mapPredToResult.get(pred) != null && mapPredToResult.get(pred).isSymmetric()) {

@@ -160,10 +160,14 @@ public class Util {
             }
 
             // in case we have not enough lines yet
+
+            numTriples = lines.size()*5; // todo: gucken, ob das Sinn macht
+
             if(desiredStrings!=null && lines.size()<numTriples){
+                fi = new FileReader(file);
                 bufferedReader = new BufferedReader(fi);
                 line = bufferedReader.readLine();
-                while (line != null) {
+                while (line != null && lines.size()<numTriples) {
                     if(!lines.contains(line)) {
                         lines.add(line);
                     }
@@ -340,8 +344,20 @@ public class Util {
     }
 
     public static void main(String[] agrs) {
-        Model modelFromFile = Util.streamModelFromFile("/Users/philipfrerk/Downloads/page-length_en.ttl", TRIPLE_AMOUNT);
-//        Model modelFromFile = getModelFromFile("tempFile.ttl");
-        writeModelToFile(new File("/Users/philipfrerk/Downloads/page-length_en_small.ttl"), modelFromFile);
+        Model modelFromFile = Util.streamModelFromFile("/Users/philipfrerk/Downloads/DBPedia_abstracts/long-abstracts-en-uris_ru.ttl", TRIPLE_AMOUNT);
+//        modelFromFile = getModelFromFile("tempFile.ttl");
+        writeModelToFile(new File("/Users/philipfrerk/Downloads/DBPedia_abstracts/long-abstracts-en-uris_ru_small.ttl"), modelFromFile);
+
+//        String file = "/Users/philipfrerk/Desktop/vm/mappingbased-properties_en.ttl";
+//        String[] transitive = {"http://dbpedia.org/ontology/isPartOf","http://dbpedia.org/ontology/province",
+//                "http://dbpedia.org/ontology/locatedInArea","http://dbpedia.org/ontology/city","http://dbpedia.org/ontology/district",
+//                "http://dbpedia.org/ontology/county"};
+//
+////        String[] symm = {"spouse"};
+//
+//        String[] inverse = {"doctoralStudent", "doctoralAdvisor", "mother","child","father","follows","followedBy"};
+//
+//        Model model = streamModelFromFile(file, TRIPLE_AMOUNT, Arrays.asList(inverse));
+//        writeModelToFile(new File("inverse.ttl"), model);
     }
 }
