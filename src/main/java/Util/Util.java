@@ -1,12 +1,11 @@
 package Util;
 
-import org.apache.commons.lang3.ObjectUtils;
+import compressionHandling.GraphRePairStarter;
 import org.apache.jena.ext.com.google.common.io.Files;
 import org.apache.jena.graph.Graph;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.riot.RDFDataMgr;
-import org.apache.jena.riot.system.StreamRDF;
 import org.apache.jena.riot.system.StreamRDFBase;
 import org.apache.jena.sparql.graph.GraphFactory;
 import org.apache.jena.util.iterator.ExtendedIterator;
@@ -17,6 +16,7 @@ import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 import java.io.*;
+import java.nio.charset.Charset;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.*;
@@ -127,14 +127,13 @@ public class Util {
     }
 
     public static Model streamModelFromFile(String file, int numTriples) {
-        return streamModelFromFile(file,numTriples,null);
+        return streamModelFromFile(file, numTriples, null);
     }
 
-
-    public static Model streamModelFromFile(String file, int numTriples, List<String> desiredStrings) {
+    private static List<String> getLinesContainingStrings(String file, List<String> desiredStrings, int numTriples, List<String> existingLines) {
         FileReader fi = null;
         BufferedReader bufferedReader = null;
-        File tempfile = new File("tempFile.ttl");
+        File tempfile = new File(file + "tempFile.ttl");
         tempfile.delete();
 
         try {
@@ -145,30 +144,91 @@ public class Util {
             List<String> lines = new ArrayList<>();
 
             int i = 0;
-            while (line != null && i < numTriples) {
-                if(desiredStrings!=null){
-                    for(String desiredString : desiredStrings){
-                        if(line.contains(desiredString)){
-                            lines.add(line);
-                        }
+            while (line != null && (i < numTriples || numTriples == -1)) {
+
+                for (String desiredString : desiredStrings) {
+                    if (line.contains(desiredString) && (existingLines==null||!existingLines.contains(line))) {
+                        lines.add(line);
+                        i++;
+                        break;
                     }
-                }else{
-                    lines.add(line);
                 }
+
                 line = bufferedReader.readLine();
-                i++;
             }
+            return lines;
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                bufferedReader.close();
+                fi.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return null;
+    }
+
+    public static Model streamRealSubModelFromFile(String file, int numTriplesWithDesiredStrings, int numTriplesResidual, List<String> desiredStrings) {
+        List<String> lines = getLinesContainingStrings(file, desiredStrings, numTriplesWithDesiredStrings,null);
+        Set<String> subjects = new LinkedHashSet<>();
+        Set<String> objects = new LinkedHashSet<>();
+
+        for (String line : lines) {
+            String[] components = line.split(" ");
+            subjects.add(components[0]);
+            objects.add(components[2]);
+            if(components.length>4){
+                System.out.println("wrong line:"+line);
+            }
+        }
+
+        List<String> linesWithSubjects = getLinesContainingStrings(file, new ArrayList<>(subjects), numTriplesResidual / 2,lines);
+        Set<String> linesSet = new LinkedHashSet<>(lines);
+        linesSet.addAll(linesWithSubjects);
+        List<String> linesWithObjects = getLinesContainingStrings(file, new ArrayList<>(objects), numTriplesResidual / 2,new ArrayList<>(linesSet));
+
+
+        linesSet.addAll(linesWithObjects);
+
+        lines = new ArrayList<>(linesSet);
+
+        StringBuilder sb = new StringBuilder();
+        for (int k = 0; k < lines.size() - 1; k++) {
+            sb.append(lines.get(k));
+            if (k < lines.size() - 2) {
+                sb.append("\n");
+            }
+        }
+
+        File tempfile = new File(file + "_tempSub.ttl");
+        try {
+            Files.write(sb.toString().getBytes(), tempfile);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return getModelFromFile(tempfile.getAbsolutePath());
+    }
+
+    public static Model streamModelFromFile(String file, int numTriples, List<String> desiredStrings) {
+        FileReader fi = null;
+        BufferedReader bufferedReader = null;
+        File tempfile = new File(file + "_temp.ttl");
+        tempfile.delete();
+
+        try {
+            List<String> lines = getLinesContainingStrings(file, desiredStrings, numTriples,null);
 
             // in case we have not enough lines yet
+            numTriples = lines.size() * 5; // todo: gucken, ob das Sinn macht
 
-            numTriples = lines.size()*5; // todo: gucken, ob das Sinn macht
-
-            if(desiredStrings!=null && lines.size()<numTriples){
+            if (desiredStrings != null && lines.size() < numTriples) {
                 fi = new FileReader(file);
                 bufferedReader = new BufferedReader(fi);
-                line = bufferedReader.readLine();
-                while (line != null && lines.size()<numTriples) {
-                    if(!lines.contains(line)) {
+                String line = bufferedReader.readLine();
+                while (line != null && lines.size() < numTriples) {
+                    if (!lines.contains(line)) {
                         lines.add(line);
                     }
                     line = bufferedReader.readLine();
@@ -183,7 +243,6 @@ public class Util {
                 }
             }
 
-
             Files.write(sb.toString().getBytes(), tempfile);
             return getModelFromFile(tempfile.getAbsolutePath());
 
@@ -194,7 +253,6 @@ public class Util {
             try {
                 bufferedReader.close();
                 fi.close();
-//                tempfile.delete();
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -343,21 +401,39 @@ public class Util {
         }
     }
 
-    public static void main(String[] agrs) {
-        Model modelFromFile = Util.streamModelFromFile("/Users/philipfrerk/Downloads/DBPedia_abstracts/long-abstracts-en-uris_ru.ttl", TRIPLE_AMOUNT);
-//        modelFromFile = getModelFromFile("tempFile.ttl");
-        writeModelToFile(new File("/Users/philipfrerk/Downloads/DBPedia_abstracts/long-abstracts-en-uris_ru_small.ttl"), modelFromFile);
+    public static List<String> getLinesFromFile(String file) {
+        try {
+            return java.nio.file.Files.readAllLines(Paths.get(file), Charset.defaultCharset());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
 
-//        String file = "/Users/philipfrerk/Desktop/vm/mappingbased-properties_en.ttl";
+    public static void main(String[] agrs) {
+//        Model modelFromFile = Util.streamModelFromFile("/Users/philipfrerk/Downloads/DBPedia_abstracts/long-abstracts-en-uris_ru.ttl", TRIPLE_AMOUNT);
+//        modelFromFile = getModelFromFile("tempFile.ttl");
+//        writeModelToFile(new File("/Users/philipfrerk/Downloads/DBPedia_abstracts/long-abstracts-en-uris_ru_small.ttl"), modelFromFile);
+
+        String file = "/Users/philipfrerk/Documents/RDF_data/princeton_wordnet/wordnet.nt";
 //        String[] transitive = {"http://dbpedia.org/ontology/isPartOf","http://dbpedia.org/ontology/province",
 //                "http://dbpedia.org/ontology/locatedInArea","http://dbpedia.org/ontology/city","http://dbpedia.org/ontology/district",
 //                "http://dbpedia.org/ontology/county"};
 //
-////        String[] symm = {"spouse"};
+        String[] symm = {"spouse"};
 //
 //        String[] inverse = {"doctoralStudent", "doctoralAdvisor", "mother","child","father","follows","followedBy"};
 //
 //        Model model = streamModelFromFile(file, TRIPLE_AMOUNT, Arrays.asList(inverse));
 //        writeModelToFile(new File("inverse.ttl"), model);
+
+
+        List<String> transitiveProperties = getLinesFromFile("/Users/philipfrerk/Documents/RDF_data/princeton_wordnet/transitiveProperties");
+
+//        Model model = streamRealSubModelFromFile(file, 1000, transitiveProperties);
+//        System.out.println(model.getGraph().size());
+//        writeModelToFile(new File("wordnetTransitives.ttl"), model);
+
+        new GraphRePairStarter().compress("wordnetTransitives.ttl", null, false);
     }
 }

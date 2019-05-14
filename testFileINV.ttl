@@ -1,2 +1,2 @@
 <http://0> <http://n1> <http://1> .
-<http://1> <http://n1> <http://2> .
+<http://1> <http://i1> <http://0> .

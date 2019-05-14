@@ -34,11 +34,13 @@ public class SparqlExecutor {
     }
 
 
+
+
     public static int getCount(Model model, String sparql) {
         ResultSet resultSet = executeSparql(model, sparql, true);
         int count = 0;
         while (resultSet.hasNext()) {
-            resultSet.next();
+            QuerySolution next = resultSet.next();
             count++;
         }
         return count;
