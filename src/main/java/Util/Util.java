@@ -126,10 +126,6 @@ public class Util {
         }
     }
 
-    public static Model streamModelFromFile(String file, int numTriples) {
-        return streamModelFromFile(file, numTriples, null);
-    }
-
     private static List<String> getLinesContainingStrings(String file, List<String> desiredStrings, int numTriples, List<String> existingLines) {
         FileReader fi = null;
         BufferedReader bufferedReader = null;
@@ -147,7 +143,7 @@ public class Util {
             while (line != null && (i < numTriples || numTriples == -1)) {
 
                 for (String desiredString : desiredStrings) {
-                    if (line.contains(desiredString) && (existingLines==null||!existingLines.contains(line))) {
+                    if (line.contains(desiredString) && (existingLines == null || !existingLines.contains(line))) {
                         lines.add(line);
                         i++;
                         break;
@@ -171,7 +167,7 @@ public class Util {
     }
 
     public static Model streamRealSubModelFromFile(String file, int numTriplesWithDesiredStrings, int numTriplesResidual, List<String> desiredStrings) {
-        List<String> lines = getLinesContainingStrings(file, desiredStrings, numTriplesWithDesiredStrings,null);
+        List<String> lines = getLinesContainingStrings(file, desiredStrings, numTriplesWithDesiredStrings, null);
         Set<String> subjects = new LinkedHashSet<>();
         Set<String> objects = new LinkedHashSet<>();
 
@@ -179,15 +175,15 @@ public class Util {
             String[] components = line.split(" ");
             subjects.add(components[0]);
             objects.add(components[2]);
-            if(components.length>4){
-                System.out.println("wrong line:"+line);
+            if (components.length > 4) {
+                System.out.println("wrong line:" + line);
             }
         }
 
-        List<String> linesWithSubjects = getLinesContainingStrings(file, new ArrayList<>(subjects), numTriplesResidual / 2,lines);
+        List<String> linesWithSubjects = getLinesContainingStrings(file, new ArrayList<>(subjects), numTriplesResidual / 2, lines);
         Set<String> linesSet = new LinkedHashSet<>(lines);
         linesSet.addAll(linesWithSubjects);
-        List<String> linesWithObjects = getLinesContainingStrings(file, new ArrayList<>(objects), numTriplesResidual / 2,new ArrayList<>(linesSet));
+        List<String> linesWithObjects = getLinesContainingStrings(file, new ArrayList<>(objects), numTriplesResidual / 2, new ArrayList<>(linesSet));
 
 
         linesSet.addAll(linesWithObjects);
@@ -211,28 +207,23 @@ public class Util {
         return getModelFromFile(tempfile.getAbsolutePath());
     }
 
-    public static Model streamModelFromFile(String file, int numTriples, List<String> desiredStrings) {
+    public static Model streamModelFromFile(String file, int numTriples) {
         FileReader fi = null;
         BufferedReader bufferedReader = null;
         File tempfile = new File(file + "_temp.ttl");
         tempfile.delete();
 
         try {
-            List<String> lines = getLinesContainingStrings(file, desiredStrings, numTriples,null);
 
-            // in case we have not enough lines yet
-            numTriples = lines.size() * 5; // todo: gucken, ob das Sinn macht
-
-            if (desiredStrings != null && lines.size() < numTriples) {
-                fi = new FileReader(file);
-                bufferedReader = new BufferedReader(fi);
-                String line = bufferedReader.readLine();
-                while (line != null && lines.size() < numTriples) {
-                    if (!lines.contains(line)) {
-                        lines.add(line);
-                    }
-                    line = bufferedReader.readLine();
+            List<String> lines = new ArrayList<>();
+            fi = new FileReader(file);
+            bufferedReader = new BufferedReader(fi);
+            String line = bufferedReader.readLine();
+            while (line != null && lines.size() < numTriples) {
+                if (!lines.contains(line)) {
+                    lines.add(line);
                 }
+                line = bufferedReader.readLine();
             }
 
             StringBuilder sb = new StringBuilder();

@@ -17,6 +17,11 @@ public class DataManipulator {
         Util.writeModelToFile(new File(newModelPath), newModel);
     }
 
+    public static void shortenModel(String fileOld, String fileNew){
+        Model model = Util.streamModelFromFile(fileOld, Util.TRIPLE_AMOUNT);
+        Util.writeModelToFile(new File(fileNew),model);
+    }
+
     public static void main (String[] args) throws IOException {
 
         List<String> symmetricPredicatesWordnet = Files.readAllLines(Paths.get("/Users/philipfrerk/Documents/RDF_data/princeton_wordnet/symmetricProperties"));
@@ -28,8 +33,18 @@ public class DataManipulator {
         inversePredicatesWordnet.add("http://wordnet-rdf.princeton.edu/ontology#hyponym");
 
 
-        storeSubModel("wordnet.nt", "wordnet_withmanyinverse.ttl", inversePredicatesWordnet, 1000, 1000);
+//        storeSubModel("wordnet.nt", "wordnet_withmanyinverse.ttl", inversePredicatesWordnet, 1000, 1000);
 
+        List<String> symmetricPredicatesDbPedia = new ArrayList<>();
+        List<String> transitivePredicatesDbPedia = Files.readAllLines(Paths.get("/Users/philipfrerk/Documents/RDF_data/DBPedia_Relevant_Data/transitiveProperties.txt"));
+
+        symmetricPredicatesDbPedia.add("http://dbpedia.org/ontology/spouse");
+//        storeSubModel("mappingbased-properties_en.ttl", "mappingbased-properties_en_manytransitives.ttl",
+//                transitivePredicatesDbPedia,1000,1000);
+
+        Model modelFromFile = Util.getModelFromFile("mappingbased-properties_en_manytransitives.ttl");
+        DataReplacer.dematerializeTransitive(transitivePredicatesDbPedia,modelFromFile,true);
+        Util.writeModelToFile(new File("mappingbased-properties_en_manytransitives_manipulated.ttl"),modelFromFile);
 
     }
 }

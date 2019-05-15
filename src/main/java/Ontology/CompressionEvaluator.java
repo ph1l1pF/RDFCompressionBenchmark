@@ -24,7 +24,7 @@ public class CompressionEvaluator {
     Configurations
      */
 
-    private static final String FILE_TO_EVALUATE = "wordnet_withmanyinverse.ttl";
+    private static final String FILE_TO_EVALUATE = "mappingbased-properties_en_manytransitives_manipulated.ttl";
 
     private static final boolean EVALUATE_CURRENT_DICT = false;
 
@@ -36,22 +36,25 @@ public class CompressionEvaluator {
         mapMaterialization.put(INVERSE, true);
         mapMaterialization.put(TRANSITIVE, false);
 
-
         mapFeatures.put(SYMMETRIC, false);
-        mapFeatures.put(INVERSE, true);
-        mapFeatures.put(TRANSITIVE, false);
+        mapFeatures.put(INVERSE, false);
+        mapFeatures.put(TRANSITIVE, true);
         mapFeatures.put(EQUIVALENT, false);
         mapFeatures.put(EVERYTHING, false);
     }
 
 
-    public static final Dataset dataset = Dataset.WORDNET;
+    public static final Dataset dataset = Dataset.DB_PEDIA;
 
     public enum Dataset{
         DB_PEDIA, WORDNET
     }
 
     //----------End configurations------------------------------------
+
+
+
+
 
     private static void evaluateEuivReplacement(List<String> files, String ontology, File fileResult) {
         List<String> filesManipulated = new ArrayList<>();
@@ -90,7 +93,6 @@ public class CompressionEvaluator {
 
     private static void evaluateSymmetricMaterialization(List<String> files, String ontology, File fileResult, boolean addEdges) {
         List<String> filesManipulated = new ArrayList<>();
-//        List<String> allSymmetricPredicates = OntologyEvaluator.getAllSymmetricPredicates(Util.getModelFromFile(ontology));
         for (String fileOriginal : files) {
             Model model = Util.getModelFromFile(fileOriginal);
             int numReplacements = DataReplacer.materializeAllSymmetricDBPediaPredicates(model, Util.getModelFromFile(ontology), addEdges);
@@ -123,7 +125,7 @@ public class CompressionEvaluator {
         System.out.println("Finished transitive compr");
     }
 
-    private static void evaluateEverything(List<String> files, String ontology, File fileResult, Map<String, Boolean> mapMaterialization) {
+    private static void evaluateEverything(List<String> files, String ontology, File fileResult) {
         List<String> filesManipulated = new ArrayList<>();
         Model modelOnt = Util.getModelFromFile(ontology);
 
@@ -132,7 +134,7 @@ public class CompressionEvaluator {
             int numReplacements = 0;
 
             numReplacements += DataReplacer.materializeAllSymmetricDBPediaPredicates(model, modelOnt, mapMaterialization.get(SYMMETRIC));
-            numReplacements += DataReplacer.materializeAllInverseDBPediaPredicates(model, model, mapMaterialization.get(INVERSE));
+            numReplacements += DataReplacer.materializeAllInverseDBPediaPredicates(model, modelOnt, mapMaterialization.get(INVERSE));
             numReplacements += DataReplacer.dematerializeAllTransitivePredicates(model, mapMaterialization.get(TRANSITIVE));
 
             File fileManipulated = new File(fileOriginal + ".all.ttl");
@@ -146,7 +148,7 @@ public class CompressionEvaluator {
 
     private static void evaluateCompression(List<String> files, File fileResult, boolean deleteFiles) {
         // TODO: sinnvoll?
-        final boolean addDictSize = true;
+        final boolean addDictSize = false;
 
         CompressionStarter cs = new GraphRePairStarter(6);
         for (String file : files) {
@@ -263,7 +265,7 @@ public class CompressionEvaluator {
             evaluateInverseMaterialization(dataFiles, ontology, resultFiles.get(4), mapMaterialization.get(INVERSE));
         }
         if(mapFeatures.get(EVERYTHING)) {
-            evaluateEverything(dataFiles, ontology, resultFiles.get(5), mapMaterialization);
+            evaluateEverything(dataFiles, ontology, resultFiles.get(5));
         }
 
         // clean up
