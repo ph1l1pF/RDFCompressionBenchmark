@@ -3,6 +3,8 @@ package Ontology;
 import Util.Util;
 
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -34,11 +36,12 @@ public class FilesAnalyzer {
 
 
 //        trans.add("http://dbpedia.org/ontology/spouse");
+        trans.add("http://wordnet-rdf.princeton.edu/ontology#antonym");
 
 
 
 
-        File file = new File("mappingbased-properties_en.ttl");
+        File file = new File("wordnet.nt");
         int numTriples=0,numOccurrences=0;
 
         if (file.getName().endsWith(".ttl") || file.getName().endsWith(".nt")) {
@@ -48,7 +51,7 @@ public class FilesAnalyzer {
             String line = bufferedReader.readLine();
             while (line != null) {
                 numTriples++;
-                for (String item : inv.keySet()) {
+                for (String item : trans) {
 
                     if (line.contains(item)) {
                         numOccurrences++;
@@ -56,13 +59,7 @@ public class FilesAnalyzer {
 
                 }
 
-                for (String item : inv.values()) {
 
-                    if (line.contains(item)) {
-                        numOccurrences++;
-                    }
-
-                }
 
 
                 line = bufferedReader.readLine();
