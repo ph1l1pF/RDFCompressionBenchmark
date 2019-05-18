@@ -142,11 +142,22 @@ public class Util {
             int i = 0;
             while (line != null && (i < numTriples || numTriples == -1)) {
 
+                boolean lineContainsDesiredString = false;
                 for (String desiredString : desiredStrings) {
-                    if (line.contains(desiredString) && (existingLines == null || !existingLines.contains(line))) {
+                    if (line.contains(desiredString)) {
+                        lineContainsDesiredString = true;
+                        break;
+                    }
+                }
+
+                if(lineContainsDesiredString){
+                    if(existingLines==null || (existingLines!=null && !existingLines.contains(line))){
                         lines.add(line);
                         i++;
-                        break;
+
+                        if(i%10==0){
+                            System.out.println("Got "+i + " lines");
+                        }
                     }
                 }
 
@@ -168,6 +179,7 @@ public class Util {
 
     public static Model streamRealSubModelFromFile(String file, int numTriplesWithDesiredStrings, int numTriplesResidual, List<String> desiredStrings) {
         List<String> lines = getLinesContainingStrings(file, desiredStrings, numTriplesWithDesiredStrings, null);
+        System.out.println("done with first step");
         Set<String> subjects = new LinkedHashSet<>();
         Set<String> objects = new LinkedHashSet<>();
 
@@ -181,6 +193,8 @@ public class Util {
         }
 
         List<String> linesWithSubjects = getLinesContainingStrings(file, new ArrayList<>(subjects), numTriplesResidual / 2, lines);
+        System.out.println("done with second step");
+
         Set<String> linesSet = new LinkedHashSet<>(lines);
         linesSet.addAll(linesWithSubjects);
         List<String> linesWithObjects = getLinesContainingStrings(file, new ArrayList<>(objects), numTriplesResidual / 2, new ArrayList<>(linesSet));

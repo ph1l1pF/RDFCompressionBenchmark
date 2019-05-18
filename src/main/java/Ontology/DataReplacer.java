@@ -130,7 +130,7 @@ public class DataReplacer {
         }
     }
 
-    public static int materializeAllSymmetricDBPediaPredicates(Model model, Model ontologyDBPedia, boolean addEdge) {
+    public static int materializeAllSymmetricDBPediaPredicates(Model model, Model ontologyDBPedia, boolean addEdge, final List<String> relevantOntologyTriples) {
 
         List<String> symmetricPredicates = new ArrayList<>();
         if(CompressionEvaluator.dataset==CompressionEvaluator.Dataset.DB_PEDIA) {
@@ -144,11 +144,14 @@ public class DataReplacer {
             symmetricPredicates = lstWordnetSymmetricPredicates;
         }
 
+        for(String pred : symmetricPredicates){
+            relevantOntologyTriples.add("<"+pred+"> <rdf:type> <owl:SymmetricProperty> .");
+        }
+
         return materializeSymmetry(symmetricPredicates, model, addEdge);
     }
 
-    public static int materializeAllInverseDBPediaPredicates(Model model, Model ontologyDBPedia, boolean addEdges) {
-
+    public static int materializeAllInverseDBPediaPredicates(Model model, Model ontologyDBPedia, boolean addEdges, final List<String> relevantOntologyTriples) {
 
         Map<String, String> invPredicates = new HashMap<>();
 
@@ -176,6 +179,11 @@ public class DataReplacer {
         }
         if(CompressionEvaluator.dataset==CompressionEvaluator.Dataset.WORDNET){
             invPredicates=mapWordnetInversePredicates;
+        }
+
+        for(String pred : invPredicates.keySet()){
+            String predInv = invPredicates.get(pred);
+            relevantOntologyTriples.add("<"+pred+"> "+"<owl:inverseOf> <"+predInv+"> .");
         }
 
         return materializeInverse(invPredicates, model, addEdges);
@@ -274,7 +282,7 @@ public class DataReplacer {
     }
 
 
-    public static int dematerializeAllTransitivePredicates(Model model, boolean addEdge) {
+    public static int dematerializeAllTransitivePredicates(Model model, boolean addEdge, final List<String> relevantOntologyTriples) {
 
         List<String> transPredicates = new ArrayList<>();
 
@@ -288,6 +296,11 @@ public class DataReplacer {
         else if(CompressionEvaluator.dataset == CompressionEvaluator.Dataset.WORDNET){
             transPredicates = lstWordnetTransitivePredicates;
         }
+
+        for(String pred : transPredicates){
+            relevantOntologyTriples.add("<"+pred+"> <rdf:type> <owl:TransitiveProperty> .");
+        }
+
         return dematerializeTransitive(transPredicates, model, addEdge);
     }
 
@@ -386,7 +399,7 @@ public class DataReplacer {
 //        replaceAllEquivalentPredicates(m, euivalenceMapping);
 
         Model modelFromFile = Util.getModelFromFile("wordnetTransitives.ttl");
-        dematerializeAllTransitivePredicates(modelFromFile,false);
+//        dematerializeAllTransitivePredicates(modelFromFile,false);
         Util.printModel(m);
 
 //        dematerializeTransitive(tran,m,true);
