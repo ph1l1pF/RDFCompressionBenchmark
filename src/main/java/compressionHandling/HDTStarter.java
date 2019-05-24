@@ -83,7 +83,7 @@ public class HDTStarter implements CompressionStarter {
     }
 
 
-    public CompressionResult decompress(String filePath) {
-        return null;
+    public long decompress(String filePath) {
+        return 0;
     }
 }

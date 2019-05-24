@@ -28,7 +28,7 @@ public class CompressionEvaluator {
     Configurations
      */
 
-    private static final String FILE_TO_EVALUATE = "mappingbased-properties_en_manysymmetrics.ttl";
+    private static final String FILE_TO_EVALUATE = "wordnet_withmanysymmetrics.ttl";
 
     private static final boolean EVALUATE_CURRENT_DICT = false;
 
@@ -48,7 +48,7 @@ public class CompressionEvaluator {
     }
 
 
-    public static final Dataset dataset = Dataset.DB_PEDIA;
+    public static final Dataset dataset = Dataset.WORDNET;
 
     public enum Dataset {
         DB_PEDIA, WORDNET
@@ -171,9 +171,8 @@ public class CompressionEvaluator {
             }
         }
 
-
         // TODO: sinnvoll?
-        final boolean addDictSize = true;
+        final boolean addDictSize = false;
 
         List<CompressionResult> results = new ArrayList<>();
         for (String file : files) {

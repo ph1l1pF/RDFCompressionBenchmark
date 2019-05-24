@@ -49,8 +49,10 @@ public class GraphRePairStarter implements CompressionStarter {
         long originalSize = inputFile.length();
 
 
-        for (File file : directoryOutput.listFiles()) {
+        List<File> outputFiles = Util.Util.listFilesSorted(directoryOutput.getAbsolutePath());
+        for (File file : outputFiles) {
             if (file.isFile()) {
+                System.out.println(file.getName() + " : "+file.length());
                 compressedSize += file.length();
             }
         }
@@ -65,11 +67,11 @@ public class GraphRePairStarter implements CompressionStarter {
         return new CompressionResult(originalSize, compressedSize, dictionarySize, compressionTime, -1, inputFile.getAbsolutePath());
     }
 
-    public CompressionResult decompress(String file) {
+    public long decompress(String file) {
+        long time = System.currentTimeMillis();
         Start.main(new String[]{"decompress output/", file, "out=" + "lo"});
 
-        return null;
-
+        return System.currentTimeMillis()-time;
     }
 
     private static long getHDTDictionarySize(String filePath) {

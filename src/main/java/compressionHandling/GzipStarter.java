@@ -35,7 +35,7 @@ public class GzipStarter implements CompressionStarter {
     }
 
     @Override
-    public CompressionResult decompress(String filePath) {
-        return null;
+    public long decompress(String filePath) {
+        return 0;
     }
 }
