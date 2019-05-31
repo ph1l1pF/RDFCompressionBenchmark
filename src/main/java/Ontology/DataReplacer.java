@@ -15,9 +15,9 @@ public class DataReplacer {
 
     private static Map<String, WikiDataHandler.Result> mapWikiPredToResult = new HashMap<>();
 
-    private static List<String> lstWordnetTransitivePredicates = new ArrayList<>();
-    private static List<String> lstWordnetSymmetricPredicates = new ArrayList<>();
-    private static Map<String,String> mapWordnetInversePredicates = new HashMap<>();
+    public static List<String> lstWordnetTransitivePredicates = new ArrayList<>();
+    public static List<String> lstWordnetSymmetricPredicates = new ArrayList<>();
+    public static Map<String,String> mapWordnetInversePredicates = new HashMap<>();
 
 
     static {
@@ -361,14 +361,15 @@ public class DataReplacer {
         return new ArrayList<>(transitivePedicates);
     }
 
+    int replacements=2300;
     public static void main(String[] args) {
 
-        getAllTransitivePredicates("/Users/philipfrerk/Documents/RDF_data/princeton_wordnet/ontology.rdf");
-
-        Model m = Util.getModelFromFile("testFileSymm.ttl");
-        Model ontology = Util.getModelFromFile("dbpedia_2015-04.owl");
-
-        getWikiResults("dbpedia_2016-10.owl");
+//        getAllTransitivePredicates("/Users/philipfrerk/Documents/RDF_data/princeton_wordnet/ontology.rdf");
+//
+//        Model m = Util.getModelFromFile("testFileSymm.ttl");
+//        Model ontology = Util.getModelFromFile("dbpedia_2015-04.owl");
+//
+//        getWikiResults("dbpedia_2016-10.owl");
 
 //        List<String> p = new ArrayList<>();
 //        p.add("http://5");
@@ -376,8 +377,8 @@ public class DataReplacer {
 //        dematerializeAllTransitivePredicates(m);
 //        dematerializeAllTransitivePredicates(m,p);
 
-        Map<String,String> invPred = new HashMap<>();
-        invPred.put("http://n1","http://i1");
+//        Map<String,String> invPred = new HashMap<>();
+//        invPred.put("http://n1","http://i1");
 
 
 //
@@ -398,9 +399,10 @@ public class DataReplacer {
 //
 //        replaceAllEquivalentPredicates(m, euivalenceMapping);
 
-        Model modelFromFile = Util.getModelFromFile("wordnetTransitives.ttl");
-//        dematerializeAllTransitivePredicates(modelFromFile,false);
-        Util.printModel(m);
+        Model modelFromFile = Util.getModelFromFile("wordnet_entity_subgraph.ttl");
+        System.out.println(dematerializeAllTransitivePredicates(modelFromFile,true, new ArrayList<>()));
+        Util.writeModelToFile(new File("wordnet_entity_subgraph_addedTransitiveEdges.ttl"), modelFromFile);
+
 
 //        dematerializeTransitive(tran,m,true);
 
@@ -408,7 +410,6 @@ public class DataReplacer {
 //        materializeInverse(invPred,m,false);
 
 
-        Util.printModel(m);
     }
 
 

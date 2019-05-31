@@ -13,24 +13,33 @@ public class GraphRePairStarter implements CompressionStarter {
 
     private int maxRank;
 
-    public GraphRePairStarter(){
+    public GraphRePairStarter() {
         // standard value
         maxRank = 4;
     }
+
 
     public GraphRePairStarter(int maxRank) {
         this.maxRank = maxRank;
     }
 
+    private List<File> getOutputFiles(String fileName) {
+        List<File> outputFiles = new ArrayList<>();
+        outputFiles.add(new File(fileName + ".gr.gr.multi"));
+        outputFiles.add(new File(fileName + ".gr.gr.P"));
+        outputFiles.add(new File(fileName + ".gr.gr.perms"));
+        outputFiles.add(new File(fileName + ".gr.gr.S"));
+        outputFiles.add(new File(fileName + ".gr.gr.ids"));
+        return outputFiles;
+    }
+
     public CompressionResult compress(String filePath, String outputName, boolean addDictionarySizeToCompressedSize) {
 
         // remove old compression output
-        File directoryOutput = new File("output_" + filePath);
+        List<File> outputFiles = getOutputFiles(filePath);
 
-        try {
-            FileUtils.deleteDirectory(directoryOutput);
-        } catch (IOException e) {
-            e.printStackTrace();
+        for (File file : outputFiles) {
+            file.delete();
         }
 
         // compute the HDT dictionary size and add it the compression result size
@@ -42,25 +51,20 @@ public class GraphRePairStarter implements CompressionStarter {
 
         // start new compression
         long compressionTime = System.currentTimeMillis();
-        Start.main(new String[]{"compress", filePath, "t=rdf", "maxRank="+maxRank ,"order=none"});
+        Start.main(new String[]{"compress", filePath, "t=rdf", "maxRank=" + maxRank, "order=none","minSaving=8"});
         compressionTime = System.currentTimeMillis() - compressionTime;
 
         File inputFile = new File(filePath);
         long originalSize = inputFile.length();
 
 
-        List<File> outputFiles = Util.Util.listFilesSorted(directoryOutput.getAbsolutePath());
         for (File file : outputFiles) {
-            if (file.isFile()) {
-                System.out.println(file.getName() + " : "+file.length());
-                compressedSize += file.length();
-            }
+            System.out.println(file.getName() + " : " + file.length());
+            compressedSize += file.length();
         }
 
-        try {
-            FileUtils.deleteDirectory(directoryOutput);
-        } catch (IOException e) {
-            e.printStackTrace();
+        for (File file : outputFiles) {
+            file.delete();
         }
 
 
@@ -71,7 +75,7 @@ public class GraphRePairStarter implements CompressionStarter {
         long time = System.currentTimeMillis();
         Start.main(new String[]{"decompress output/", file, "out=" + "lo"});
 
-        return System.currentTimeMillis()-time;
+        return System.currentTimeMillis() - time;
     }
 
     private static long getHDTDictionarySize(String filePath) {

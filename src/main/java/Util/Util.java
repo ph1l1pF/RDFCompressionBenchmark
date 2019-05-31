@@ -30,7 +30,7 @@ public class Util {
 
     private static final int TRIPLE_COMPONENT_LENGTH = 10;
 
-    public static final int TRIPLE_AMOUNT = 10000;
+    public static final int TRIPLE_AMOUNT = Integer.MAX_VALUE;
 
     private static Random r = new Random();
 
@@ -445,7 +445,16 @@ public class Util {
     }
 
     public static void main(String[] agrs) {
-      createEntityBasedSubGraph("http://dbpedia.org/resource/Abraham_Lincoln","mappingbased-properties_en.ttl",
-                "mappingbased-properties_en_lincoln.ttl", 3, 1000);
+//      createEntityBasedSubGraph("http://dbpedia.org/resource/Abraham_Lincoln","mappingbased-properties_en.ttl",
+//                "mappingbased-properties_en_lincoln.ttl", 3, 1000);
+
+//        createEntityBasedSubGraph("http://wordnet-rdf.princeton.edu/rdf/lemma/knave#knave-n","wordnet.nt",
+//                "wordnet_entity_subgraph.ttl", 3, 1000);
+
+//        createEntityBasedSubGraph("http://wordnet-rdf.princeton.edu/rdf/lemma/know#know-n","wordnet.nt",
+//                "wordnet_entity_subgraph2.ttl", 3, 1000);
+
+        createEntityBasedSubGraph("http://dbpedia.org/resource/Idu_Mishmi_language","/Users/philipfrerk/Documents/RDF_data/DBPedia_2015/instance-types_en.nt",
+                "instance-types_en_entitiybased.ttl", 3, 1000);
     }
 }

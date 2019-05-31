@@ -49,12 +49,12 @@ public class RDFTurtleConverter {
             counter++;
 
             Triple triple = tripleExtendedIterator.next();
-            stringBuilder.append("<" + getLabel(triple.getSubject()) + "> <" + getLabel(triple.getPredicate()) + "> <" + getLabel(triple.getObject()) + "> .\n");
+            lines.add("<" + getLabel(triple.getSubject()) + "> <" + getLabel(triple.getPredicate()) + "> <" + getLabel(triple.getObject()) + "> .");
         }
 
         System.out.println("done");
 
-        File ttlFile = new File(filePath + "_");
+        File ttlFile = new File(filePath + ".ttl");
         if (ttlFile.exists()) {
             ttlFile.delete();
         }

@@ -17,9 +17,9 @@ import java.util.*;
 public class CompressionEvaluator {
 
     private static final String ORIGINAL = "original";
-    private static final String TRANSITIVE = "transitive";
-    private static final String SYMMETRIC = "symmetric";
-    private static final String INVERSE = "inverse";
+    public static final String TRANSITIVE = "transitive";
+    public static final String SYMMETRIC = "symmetric";
+    public static final String INVERSE = "inverse";
     private static final String EQUIVALENT = "equivalent";
     private static final String EVERYTHING = "everything";
 
@@ -36,9 +36,9 @@ public class CompressionEvaluator {
     private static final Map<String, Boolean> mapActiveFeatures = new HashMap<>();
 
     static {
-        mapMaterialization.put(SYMMETRIC, true);
-        mapMaterialization.put(INVERSE, true);
-        mapMaterialization.put(TRANSITIVE, false);
+        mapMaterialization.put(SYMMETRIC, false);
+        mapMaterialization.put(INVERSE, false);
+        mapMaterialization.put(TRANSITIVE, true);
 
         mapActiveFeatures.put(SYMMETRIC, true);
         mapActiveFeatures.put(INVERSE, false);
@@ -48,9 +48,9 @@ public class CompressionEvaluator {
     }
 
 
-    public static final Dataset dataset = Dataset.WORDNET;
+    public static final Dataset dataset = Dataset.DB_PEDIA;
 
-    public enum Dataset {
+    public static enum Dataset {
         DB_PEDIA, WORDNET
     }
 
@@ -288,7 +288,9 @@ public class CompressionEvaluator {
         for (String feature : mapResults.keySet()) {
             if (!feature.equals(ORIGINAL)) {
                 long compressedSize = mapResults.get(feature).get(0).getCompressedSize();
-                System.out.print(feature + " compr size: " + compressedSize);
+                System.out.println(feature + " compr size: " + compressedSize);
+                double ratio = 1.0*compressedSize/compressedSizeOrignal;
+                System.out.print(feature + " ratio: " + ratio);
             }
         }
 

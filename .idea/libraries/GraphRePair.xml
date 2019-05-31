@@ -1,9 +1,0 @@
-<component name="libraryTable">
-  <library name="GraphRePair">
-    <CLASSES>
-      <root url="jar://$PROJECT_DIR$/GraphRePair.jar!/" />
-    </CLASSES>
-    <JAVADOC />
-    <SOURCES />
-  </library>
-</component>

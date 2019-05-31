@@ -25,7 +25,6 @@ public class FilesAnalyzer {
         inv.put("http://dbpedia.org/ontology/doctoralAdvisor" , "http://dbpedia.org/ontology/doctoralStudent");
         inv.put("http://dbpedia.org/ontology/spouse" , "http://dbpedia.org/ontology/spouse");
 
-        List<String> trans = new ArrayList<>();
 //        trans.add("http://dbpedia.org/ontology/isPartOf");
 //        trans.add("http://dbpedia.org/ontology/province");
 //        trans.add("http://dbpedia.org/ontology/locatedInArea");
@@ -36,7 +35,7 @@ public class FilesAnalyzer {
 
 
 //        trans.add("http://dbpedia.org/ontology/spouse");
-        trans.add("http://wordnet-rdf.princeton.edu/ontology#antonym");
+
 
 
 
@@ -51,14 +50,20 @@ public class FilesAnalyzer {
             String line = bufferedReader.readLine();
             while (line != null) {
                 numTriples++;
-                for (String item : trans) {
+                for (String item : DataReplacer.mapWordnetInversePredicates.keySet()) {
 
                     if (line.contains(item)) {
                         numOccurrences++;
                     }
 
                 }
+                for (String item : DataReplacer.mapWordnetInversePredicates.values()) {
 
+                    if (line.contains(item)) {
+                        numOccurrences++;
+                    }
+
+                }
 
 
 

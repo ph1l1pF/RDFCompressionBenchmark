@@ -19,11 +19,11 @@ import java.util.Random;
 
 public class StarGraphEvaluator {
 
-    private static EvalResult evaluateStarGraphs() {
+    private static EvalResult evaluateStarGraphs(int numPredicates) {
         List<List<Triple>> graphs = StarPatternGenerator.generateMultipleStarPatternGraphsWithFixedSize();
 
         for (List<Triple> graph : graphs) {
-            distributePredicates(graph, 1);
+            distributePredicates(graph, numPredicates);
         }
         return evaluateCompressors(graphs);
     }
@@ -56,14 +56,16 @@ public class StarGraphEvaluator {
             String filePath = "file.ttl";
             Util.Util.writeTriplesToFile(graph, filePath);
 
+            final boolean addDictSize = false;
+
             HDTStarter hdtStarter = new HDTStarter();
-            compressionResultsHDT.add(hdtStarter.compress(filePath, "fileCompressedWithHDT.hdt", true));
+            compressionResultsHDT.add(hdtStarter.compress(filePath, "fileCompressedWithHDT.hdt", addDictSize));
 
             GraphRePairStarter graphRePairStarter = new GraphRePairStarter();
-            compressionResultsGRP.add(graphRePairStarter.compress(filePath, null, true));
+            compressionResultsGRP.add(graphRePairStarter.compress(filePath, null, addDictSize));
 
-            GzipStarter gzipStarter = new GzipStarter();
-            compressionResultsGzip.add(gzipStarter.compress(filePath, "fileCompressedWithGzip.gzip", true));
+//            GzipStarter gzipStarter = new GzipStarter();
+//            compressionResultsGzip.add(gzipStarter.compress(filePath, "fileCompressedWithGzip.gzip", true));
 
             System.out.println("\n\n\n\n-----------------------");
             System.out.println(100.0 * count / graphs.size() + "% done");
@@ -71,9 +73,9 @@ public class StarGraphEvaluator {
             count++;
         }
 
-        printResults(compressionResultsHDT, compressionResultsGRP,compressionResultsGzip);
+        printResults(compressionResultsHDT, compressionResultsGRP, compressionResultsGzip);
 
-        return new EvalResult(compressionResultsHDT, compressionResultsGRP,compressionResultsGzip);
+        return new EvalResult(compressionResultsHDT, compressionResultsGRP, compressionResultsGzip);
     }
 
 
@@ -110,14 +112,14 @@ public class StarGraphEvaluator {
     private static class EvalResult {
         List<CompressionResult> compressionResultsHDT, compressionResultsGRP, compressionResultsGzip;
 
-        public EvalResult(List<CompressionResult> compressionResultsHDT, List<CompressionResult> compressionResultsGRP,List<CompressionResult> compressionResultsGzip) {
+        public EvalResult(List<CompressionResult> compressionResultsHDT, List<CompressionResult> compressionResultsGRP, List<CompressionResult> compressionResultsGzip) {
             this.compressionResultsHDT = compressionResultsHDT;
             this.compressionResultsGRP = compressionResultsGRP;
             this.compressionResultsGzip = compressionResultsGzip;
         }
     }
 
-    private static void evaluateRunTimes(List<EvalResult> evalResults){
+    private static void evaluateRunTimes(List<EvalResult> evalResults) {
         // compute average run time
         long[] sumsHDT = new long[evalResults.get(0).compressionResultsHDT.size()];
         long[] sumsGRP = new long[evalResults.get(0).compressionResultsGRP.size()];
@@ -153,10 +155,17 @@ public class StarGraphEvaluator {
 
         // multiple runnings for runtime measurement
 
-        List<EvalResult> evalResults = new ArrayList<>();
-        int numExecutions = 1;
-        for (int i = 0; i < numExecutions; i++) {
-            evalResults.add(evaluateStarGraphs());
+        for (int i = 1; i < 100; i += 10) {
+            List<EvalResult> evalResults = new ArrayList<>();
+            EvalResult result = evaluateStarGraphs(i);
+            evalResults.add(result);
+
+            for (int j = 0; j < result.compressionResultsHDT.size(); j++) {
+                if(result.compressionResultsHDT.get(j).getCompressionRatio()<result.compressionResultsGRP.get(j).getCompressionRatio()){
+                    System.out.println("hdt wins at "+i);
+                    return;
+                }
+            }
         }
 
 
