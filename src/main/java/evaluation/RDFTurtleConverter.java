@@ -1,5 +1,6 @@
-package Util;
+package evaluation;
 
+import Util.Util;
 import compressionHandling.HDTStarter;
 import org.apache.jena.ext.com.google.common.io.Files;
 import org.apache.jena.graph.Node_Blank;
@@ -27,6 +28,13 @@ public class RDFTurtleConverter {
             return null;
         }
         return modelConcrete.getGraph().find();
+    }
+
+    public static File convertAndStoreAsNTriples(String filePath){
+        Model modelFromFile = Util.getModelFromFile(filePath);
+        File file = new File(filePath + ".ttl");
+        Util.writeModelToFile(file,modelFromFile);
+        return file;
     }
 
     public static File convertAndStoreAsTurtleFile(String filePath) {

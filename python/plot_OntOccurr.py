@@ -2,13 +2,13 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 # Werte der Vorkommen von relevanten properties
-list1 = (0.03229303006589987,0.07437941003379382) 
-list2 = (7.659172516304325E-4,0.0030271109007844778)
-list3 = (0.003363577301160723,0.06762709087930689)
+#list1 = (0.03229303006589987,0.07437941003379382) 
+#list2 = (7.659172516304325E-4,0.0030271109007844778)
+#list3 = (0.003363577301160723,0.06762709087930689)
 
-#list1 = [2.623119358]
-#list2 = (3.46628131)
-#list3 = (1.784)
+list1 = [1,1]
+list2 = (8,1)
+list3 = (7,12)
 
 
 labels = ['DBPedia','Wordnet']
@@ -18,15 +18,15 @@ if(labels.__len__()==0):
             labels.append('DF'+str(i))
 
 ind = np.arange(len(list1))  # the x locations for the groups
-width = 0.05  # the width of the bars
+width = 0.1  # the width of the bars
 
 fig, ax = plt.subplots()
-rects1 = ax.bar(ind - width-0.1, list1, width, 
-                color='SkyBlue', label='Transitive')
+rects1 = ax.bar(ind - width, list1, width, 
+                color='SkyBlue', label='Symmetric')
 rects2 = ax.bar(ind, list2, width,
-                color='IndianRed', label='Symmetric')
-rects3 = ax.bar(ind + width+0.1, list3, width,
-                color='Orange', label='Inverse')
+                color='IndianRed', label='Inverse')
+rects3 = ax.bar(ind + width, list3, width,
+                color='Orange', label='Transitive')
 
 def autolabel(rects, xpos='center'):
     """
@@ -38,10 +38,10 @@ def autolabel(rects, xpos='center'):
 
     xpos = xpos.lower()  # normalize the case of the parameter
     ha = {'center': 'center', 'right': 'left', 'left': 'right'}
-    offset = {'center': width/2, 'right': 0, 'left': width+0.06}  # x_txt = x + w*off
+    offset = {'center': width/2, 'right': 0, 'left': width+0.01}  # x_txt = x + w*off
 
     for rect in rects:
-        height = float('%.5f'%rect.get_height())
+        height = int('%.0f'%rect.get_height())
 
         ax.text(rect.get_x()+offset[xpos] , height,
                 '{}'.format(height), ha=ha[xpos], va='bottom')
@@ -58,7 +58,7 @@ autolabel(rects3, 'right')
 
 
 # Add some text for labels, title and custom x-axis tick labels, etc.
-ax.set_ylabel('Relative amount')
+ax.set_ylabel('Total number')
 #ax.set_title('Relative amount')
 ax.set_xticks(ind)
 ax.set_xticklabels(labels)

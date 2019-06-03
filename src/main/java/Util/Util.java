@@ -10,6 +10,7 @@ import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.riot.system.StreamRDFBase;
 import org.apache.jena.sparql.graph.GraphFactory;
 import org.apache.jena.util.iterator.ExtendedIterator;
+import sun.util.resources.cldr.zh.CalendarData_zh_Hans_HK;
 
 import javax.mail.*;
 import javax.mail.internet.InternetAddress;
@@ -72,7 +73,7 @@ public class Util {
         }
     }
 
-    public static List<File> listFilesSorted(String dir){
+    public static List<File> listFilesSorted(String dir) {
         List<File> files = Arrays.asList(new File(dir).listFiles());
         Collections.sort(files);
         return files;
@@ -133,7 +134,56 @@ public class Util {
         }
     }
 
-    public static void createEntityBasedSubGraph(String entity, String fileIn, String fileOut, int transitiveSteps, int triplesLimitPerStep){
+    public static String getEntityFromGraph(String filePath) {
+        FileReader fi=null;
+        BufferedReader bufferedReader=null;
+        try {
+             fi = new FileReader(filePath);
+             bufferedReader = new BufferedReader(fi);
+
+            String line = bufferedReader.readLine();
+            Map<String, Integer> mapEntityCounts = new HashMap<>();
+            while (line != null) {
+                    String[] parts = line.split(" ");
+                    if (parts.length > 0 && parts[0].contains("<") && parts[0].contains(":")) {
+                        String entity = parts[0];
+                        entity = entity.replaceAll("<", "");
+                        entity = entity.replaceAll(">", "");
+                        if(mapEntityCounts.containsKey(entity)){
+                            mapEntityCounts.put(entity, mapEntityCounts.get(entity)+1);
+                        }else{
+                            mapEntityCounts.put(entity,1);
+                        }
+
+                    }
+                line = bufferedReader.readLine();
+            }
+
+            String mostFrequentEntity = null;
+            int maxCount = 0;
+            for(String entity : mapEntityCounts.keySet()){
+                if(mapEntityCounts.get(entity)>maxCount){
+                    mostFrequentEntity=entity;
+                    maxCount = mapEntityCounts.get(entity);
+                }
+            }
+            return mostFrequentEntity;
+
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                bufferedReader.close();
+                fi.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        throw new RuntimeException("no entity found in "+filePath);
+    }
+
+    public static void createEntityBasedSubGraph(String entity, String fileIn, String fileOut, int transitiveSteps, int triplesLimitPerStep) {
         Set<String> desiredStrings = new LinkedHashSet<>();
         List<String> linesGathered = new ArrayList<>();
 
@@ -146,7 +196,7 @@ public class Util {
         }
 
         StringBuilder stringBuilder = new StringBuilder();
-        for(String line : linesGathered){
+        for (String line : linesGathered) {
             stringBuilder.append(line);
             stringBuilder.append("\n");
         }
@@ -216,7 +266,7 @@ public class Util {
         return null;
     }
 
-    private static Set<String> getSubjectsAndObjectsFromTriples(List<String> triples){
+    private static Set<String> getSubjectsAndObjectsFromTriples(List<String> triples) {
         Set<String> subjectsAndObjects = new LinkedHashSet<>();
         for (String line : triples) {
             String[] components = line.split(" ");
@@ -454,7 +504,7 @@ public class Util {
 //        createEntityBasedSubGraph("http://wordnet-rdf.princeton.edu/rdf/lemma/know#know-n","wordnet.nt",
 //                "wordnet_entity_subgraph2.ttl", 3, 1000);
 
-        createEntityBasedSubGraph("http://dbpedia.org/resource/Idu_Mishmi_language","/Users/philipfrerk/Documents/RDF_data/DBPedia_2015/instance-types_en.nt",
+        createEntityBasedSubGraph("http://dbpedia.org/resource/Idu_Mishmi_language", "/Users/philipfrerk/Documents/RDF_data/DBPedia_2015/instance-types_en.nt",
                 "instance-types_en_entitiybased.ttl", 3, 1000);
     }
 }

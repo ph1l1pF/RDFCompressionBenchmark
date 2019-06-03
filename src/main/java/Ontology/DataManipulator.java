@@ -19,6 +19,8 @@ public class DataManipulator {
     private static List<String> symmericPredicatesDBPedia;
 
     private static Map<String,String> inversePredicatesDBPedia = new HashMap<>();
+    private static Map<String,String> inversePredicatesWordnet = new HashMap<>();
+
 
     static {
         try {
@@ -27,6 +29,7 @@ public class DataManipulator {
             symmericPredicatesDBPedia = Files.readAllLines(Paths.get("/Users/philipfrerk/Documents/RDF_data/DBPedia_Relevant_Data/symmetricPorperties.txt"));
 
             inversePredicatesDBPedia = getInversePropertiesFromFile("/Users/philipfrerk/Documents/RDF_data/DBPedia_Relevant_Data/inverseProperties.txt");
+            inversePredicatesWordnet = getInversePropertiesFromFile("/Users/philipfrerk/Documents/RDF_data/princeton_wordnet/inverseProperties");
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -127,12 +130,11 @@ public class DataManipulator {
 //                symmetricPredicatesDbPedia,10000,10000);
 
 
-        Model modelFromFile = Util.getModelFromFile("mappingbased-properties_en_manyinverses.ttl");
-        DataReplacer.materializeInverse(inversePredicatesDBPedia,modelFromFile,true);
-        Util.writeModelToFile(new File("mappingbased-properties_en_manyinverses_alledgesadded.ttl"),modelFromFile);
+//        Model modelFromFile = Util.getModelFromFile("mappingbased-properties_en_manyinverses.ttl");
+//        DataReplacer.materializeInverse(inversePredicatesDBPedia,modelFromFile,false);
+//        Util.writeModelToFile(new File("mappingbased-properties_en_manyinverses_alledgesremoved.ttl"),modelFromFile);
 
-//        List<String> inversePropertiesDBPedia = getInversePropertiesFromFile("/Users/philipfrerk/Documents/RDF_data/DBPedia_Relevant_Data/inverseProperties.txt");
-//        storeSubModel("mappingbased-properties_en.ttl", "mappingbased-properties_en_manyinverses.ttl", inversePropertiesDBPedia, 1000, 100);
+        storeSubModel("mappingbased-properties_en.ttl", "mappingbased-properties_en_manyinversesBigger.ttl", DataReplacer.lstDBPediaInversePredicates, 50000, 1000);
 
     }
 }

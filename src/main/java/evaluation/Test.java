@@ -1,12 +1,9 @@
 package evaluation;
 
-import Util.RDFTurtleConverter;
 import compressionHandling.CompressionResult;
 import compressionHandling.CompressionStarter;
 import compressionHandling.GraphRePairStarter;
 import compressionHandling.HDTStarter;
-
-import java.io.File;
 
 public class Test {
 

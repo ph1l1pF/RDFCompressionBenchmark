@@ -1,16 +1,11 @@
 package evaluation;
 
-import Util.RDFTurtleConverter;
 import compressionHandling.CompressionResult;
 import compressionHandling.CompressionStarter;
 import compressionHandling.GraphRePairStarter;
-import compressionHandling.HDTStarter;
-import org.apache.jena.base.Sys;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 public class DogFoodCompressor {

@@ -18,6 +18,9 @@ public class DataReplacer {
     public static List<String> lstWordnetTransitivePredicates = new ArrayList<>();
     public static List<String> lstWordnetSymmetricPredicates = new ArrayList<>();
     public static Map<String,String> mapWordnetInversePredicates = new HashMap<>();
+    public static Map<String,String> mapDBPediaInversePredicates = new HashMap<>();
+
+    public static List<String> lstDBPediaInversePredicates = new ArrayList<>();
 
 
     static {
@@ -32,6 +35,14 @@ public class DataReplacer {
             for(String inverseLine : inverseLines){
                 String[] uris = inverseLine.split(" ");
                 mapWordnetInversePredicates.put(uris[0].trim(),uris[1].trim());
+            }
+
+             inverseLines = Files.readAllLines(Paths.get("/Users/philipfrerk/Documents/RDF_data/DBPedia_Relevant_Data/inverseProperties.txt"), Charset.defaultCharset());
+            for(String inverseLine : inverseLines){
+                String[] uris = inverseLine.split(" ");
+                mapDBPediaInversePredicates.put(uris[0].trim(),uris[1].trim());
+                lstDBPediaInversePredicates.add(uris[0].trim());
+                lstDBPediaInversePredicates.add(uris[1].trim());
             }
 
         } catch (IOException e) {

@@ -28,7 +28,7 @@ public class CompressionEvaluator {
     Configurations
      */
 
-    private static final String FILE_TO_EVALUATE = "wordnet_withmanysymmetrics.ttl";
+    private static final String FILE_TO_EVALUATE = "mappingbased-properties_en_manyinversesBigger.ttl";
 
     private static final boolean EVALUATE_CURRENT_DICT = false;
 
@@ -37,11 +37,11 @@ public class CompressionEvaluator {
 
     static {
         mapMaterialization.put(SYMMETRIC, false);
-        mapMaterialization.put(INVERSE, false);
-        mapMaterialization.put(TRANSITIVE, true);
+        mapMaterialization.put(INVERSE, true);
+        mapMaterialization.put(TRANSITIVE, false);
 
-        mapActiveFeatures.put(SYMMETRIC, true);
-        mapActiveFeatures.put(INVERSE, false);
+        mapActiveFeatures.put(SYMMETRIC, false);
+        mapActiveFeatures.put(INVERSE, true);
         mapActiveFeatures.put(TRANSITIVE, false);
         mapActiveFeatures.put(EQUIVALENT, false);
         mapActiveFeatures.put(EVERYTHING, false);
