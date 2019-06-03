@@ -19,9 +19,12 @@ import java.util.Random;
 
 public class StarGraphEvaluator {
 
+    private static int numTriples = -1;
+
     private static EvalResult evaluateStarGraphs(int numPredicates) {
         List<List<Triple>> graphs = StarPatternGenerator.generateMultipleStarPatternGraphsWithFixedSize();
 
+        numTriples = graphs.get(0).size();
         for (List<Triple> graph : graphs) {
             distributePredicates(graph, numPredicates);
         }
@@ -56,7 +59,7 @@ public class StarGraphEvaluator {
             String filePath = "file.ttl";
             Util.Util.writeTriplesToFile(graph, filePath);
 
-            final boolean addDictSize = false;
+            final boolean addDictSize = true;
 
             HDTStarter hdtStarter = new HDTStarter();
             compressionResultsHDT.add(hdtStarter.compress(filePath, "fileCompressedWithHDT.hdt", addDictSize));
@@ -73,7 +76,7 @@ public class StarGraphEvaluator {
             count++;
         }
 
-        printResults(compressionResultsHDT, compressionResultsGRP, compressionResultsGzip);
+//        printResults(compressionResultsHDT, compressionResultsGRP, compressionResultsGzip);
 
         return new EvalResult(compressionResultsHDT, compressionResultsGRP, compressionResultsGzip);
     }
@@ -150,24 +153,52 @@ public class StarGraphEvaluator {
         }
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
 //        evaluatePredicateAmount();
 
         // multiple runnings for runtime measurement
 
-        for (int i = 1; i < 100; i += 10) {
-            List<EvalResult> evalResults = new ArrayList<>();
-            EvalResult result = evaluateStarGraphs(i);
+        List<EvalResult> evalResults = new ArrayList<>();
+        int maxPredicateValue = 0;
+        outer: for (int predicates = 1; predicates <=1; predicates += 5) {
+
+            EvalResult result = evaluateStarGraphs(predicates);
             evalResults.add(result);
 
             for (int j = 0; j < result.compressionResultsHDT.size(); j++) {
                 if(result.compressionResultsHDT.get(j).getCompressionRatio()<result.compressionResultsGRP.get(j).getCompressionRatio()){
-                    System.out.println("hdt wins at "+i);
-                    return;
+                    maxPredicateValue = predicates;
+                    break outer;
                 }
             }
         }
 
+        File fileStarPatternResultsHDT = new File("starPatternResultsHDT.txt");
+        fileStarPatternResultsHDT.delete();
+        File fileStarPatternResultsGRP = new File("starPatternResultsGRP.txt");
+        fileStarPatternResultsGRP.delete();
+
+        StringBuilder sb = new StringBuilder();
+        for(EvalResult evalResult : evalResults){
+
+            for(CompressionResult resultHDT : evalResult.compressionResultsHDT){
+                sb.append(resultHDT.getCompressionRatio()+",");
+            }
+            sb.append("\n");
+        }
+        Files.write(sb.toString().getBytes(), fileStarPatternResultsHDT);
+
+        sb = new StringBuilder();
+
+
+        for(EvalResult evalResult : evalResults){
+
+            for(CompressionResult resultGRP : evalResult.compressionResultsGRP){
+                sb.append(resultGRP.getCompressionRatio()+",");
+            }
+            sb.append("\n");
+        }
+        Files.write(sb.toString().getBytes(), fileStarPatternResultsGRP);
 
     }
 }

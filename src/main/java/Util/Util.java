@@ -25,9 +25,9 @@ import java.util.*;
 
 public class Util {
 
-    private static final String HTTP_PREFIX_SUBJECT = "http://subject/";
-    private static final String HTTP_PREFIX_PREDICATE = "http://predicate/";
-    private static final String HTTP_PREFIX_OBJECT = "http://object/";
+    private static final String HTTP_PREFIX_SUBJECT = "http://uni-paderborn.computerscience.de/subject/";
+    private static final String HTTP_PREFIX_PREDICATE = "http://uni-paderborn.computerscience.de/predicate/";
+    private static final String HTTP_PREFIX_OBJECT = "http://uni-paderborn.computerscience.de/object/";
 
     private static final int TRIPLE_COMPONENT_LENGTH = 10;
 

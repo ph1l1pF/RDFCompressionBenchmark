@@ -67,14 +67,15 @@ public class StarPatternGenerator {
      */
     public static List<List<Triple>> generateMultipleStarPatternGraphsWithFixedSize() {
         int steps = 40;
-        int numNodes = 30 * steps;
+        int numNodes = 25 * steps;
 
         // compute numEdges, has to be the max-size, that one of the sets (subjects, objects) can reach
         int numEdges = numNodes - 1;
 
         List<List<Triple>> graphs = new ArrayList<>();
 
-        for (int numSubjects = 1; numSubjects <= numNodes; numSubjects += steps) {
+        int numSubjects =50;
+        for (; numSubjects <= numNodes; numSubjects += steps) {
             graphs.add(generateStarGraphWithFixedSize(numEdges, numNodes, numSubjects));
         }
         return graphs;

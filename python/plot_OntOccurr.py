@@ -38,18 +38,14 @@ def autolabel(rects, xpos='center'):
 
     xpos = xpos.lower()  # normalize the case of the parameter
     ha = {'center': 'center', 'right': 'left', 'left': 'right'}
-    offset = {'center': width/2, 'right': 0, 'left': width+0.01}  # x_txt = x + w*off
+    offset = {'center': width/2, 'right': 0, 'left': width}  # x_txt = x + w*off
 
     for rect in rects:
         height = int('%.0f'%rect.get_height())
 
         ax.text(rect.get_x()+offset[xpos] , height,
                 '{}'.format(height), ha=ha[xpos], va='bottom')
-        #ax.annotate('{}'.format(height),
-         #           xy=(rect.get_x() , height),
-         #           xytext=(offset[xpos]*1, 0),  # use 3 points offset
-          #          textcoords="offset points",  # in both directions
-          #          ha=ha[xpos], va='bottom')
+        
 
 
 autolabel(rects1, 'left')
