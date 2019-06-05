@@ -21,7 +21,7 @@ import java.util.Set;
 
 public class HDTAndGRPComparer {
 
-    private static final String DIRECTORY = "/Users/philipfrerk/Documents/RDF_data/MIXED";
+    private static final String DIRECTORY = "/Users/philipfrerk/Documents/RDF_data/opendata";
 
     private static List<File> filesToRemove = new ArrayList<>();
 
@@ -79,6 +79,12 @@ public class HDTAndGRPComparer {
         for (File file : filesToRemove) {
             file.delete();
         }
+
+        System.out.println("\nFiles:");
+        for(File graph : preparedGraphs){
+            System.out.print(graph.getName()+",");
+        }
+
 
         writeResultsToFiles(resultsHDT,resultsGRP,featureResults,lstStarSims);
 

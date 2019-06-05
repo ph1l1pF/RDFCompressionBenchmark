@@ -62,7 +62,7 @@ public class StarGraphEvaluator {
 
             lstStartPatternSimilarities.add(StarPatternAnalyzer.analyzeStarSimilarity(filePath));
 
-            final boolean addDictSize = true;
+            final boolean addDictSize = false;
 
             HDTStarter hdtStarter = new HDTStarter();
             compressionResultsHDT.add(hdtStarter.compress(filePath, "fileCompressedWithHDT.hdt", addDictSize));
@@ -166,19 +166,29 @@ public class StarGraphEvaluator {
         // multiple runnings for runtime measurement
 
         List<EvalResult> evalResults = new ArrayList<>();
-        int maxPredicateValue = 0;
-        outer: for (int predicates = 1; predicates <=1; predicates += 5) {
+        int maxPredicateValue = -1;
+        int i = 0;
+        int indexHDTGetsBetter = -1;
+        for (int predicates = 1; predicates <=90; predicates += 15) {
 
             EvalResult result = evaluateStarGraphs(predicates);
             evalResults.add(result);
 
             for (int j = 0; j < result.compressionResultsHDT.size(); j++) {
                 if(result.compressionResultsHDT.get(j).getCompressionRatio()<result.compressionResultsGRP.get(j).getCompressionRatio()){
-                    maxPredicateValue = predicates;
-                    break outer;
+                    if(maxPredicateValue==-1) {
+                        maxPredicateValue = predicates;
+                    }
+                    if(indexHDTGetsBetter==-1) {
+                        indexHDTGetsBetter = i;
+                    }
                 }
             }
+            i++;
         }
+
+        System.out.println("\nat this ELR HDT gets better: "+1.0*maxPredicateValue/numTriples);
+        System.out.println("at this index: " + indexHDTGetsBetter);
 
         File fileStarPatternResultsHDT = new File("starPatternResultsHDT.txt");
         fileStarPatternResultsHDT.delete();

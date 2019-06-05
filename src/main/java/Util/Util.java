@@ -134,6 +134,34 @@ public class Util {
         }
     }
 
+    private static class Entity implements Comparable{
+        private String uri;
+        private int numOccurrences;
+
+        public Entity(String uri, int numOccurrences) {
+            this.uri = uri;
+            this.numOccurrences = numOccurrences;
+        }
+
+        @Override
+        public int compareTo(Object o) {
+            Entity entity = (Entity)o;
+            if(numOccurrences<entity.numOccurrences){
+                return -1;
+            }
+            else if(numOccurrences>entity.numOccurrences){
+                return 1;
+            }else{
+                return 0;
+            }
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            return uri.equals(((Entity)obj).uri);
+        }
+    }
+
     public static String getMostFrequentEntityFromGraph(String filePath) {
         FileReader fi=null;
         BufferedReader bufferedReader=null;
@@ -142,33 +170,35 @@ public class Util {
              bufferedReader = new BufferedReader(fi);
 
             String line = bufferedReader.readLine();
-            Map<String, Integer> mapEntityCounts = new HashMap<>();
+            List<Entity> entities = new ArrayList<>();
             while (line != null) {
                     String[] parts = line.split(" ");
                     if (parts.length > 0 && parts[0].contains("<") && parts[0].contains(":")) {
-                        String entity = parts[0];
-                        entity = entity.replaceAll("<", "");
-                        entity = entity.replaceAll(">", "");
-                        if(mapEntityCounts.containsKey(entity)){
-                            mapEntityCounts.put(entity, mapEntityCounts.get(entity)+1);
-                        }else{
-                            mapEntityCounts.put(entity,1);
+                        String strEntity = parts[0];
+                        strEntity = strEntity.replaceAll("<", "");
+                        strEntity = strEntity.replaceAll(">", "");
+
+                        Entity entity = new Entity(strEntity,1);
+
+                        boolean found = false;
+                        for (int i = 0; i < entities.size(); i++) {
+                            if(entities.get(i).equals(entity)){
+                                found = true;
+                                entities.get(i).numOccurrences++;
+                            }
+                        }
+                        if(!found){
+                            entities.add(entity);
                         }
 
                     }
                 line = bufferedReader.readLine();
             }
 
-            String mostFrequentEntity = null;
-            int maxCount = 0;
-            for(String entity : mapEntityCounts.keySet()){
-                if(mapEntityCounts.get(entity)>maxCount){
-                    mostFrequentEntity=entity;
-                    maxCount = mapEntityCounts.get(entity);
-                }
-            }
-            return mostFrequentEntity;
+            Collections.sort(entities);
 
+            int index = (int) Math.floor(entities.size()*0.8);
+            return entities.get(index).uri;
 
         } catch (Exception e) {
             e.printStackTrace();
