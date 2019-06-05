@@ -11,6 +11,9 @@ import org.apache.jena.util.iterator.ExtendedIterator;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -22,48 +25,97 @@ public class HDTAndGRPComparer {
 
     private static List<File> filesToRemove = new ArrayList<>();
 
-    private static final long BOUND_SUBGRAPH = 20000000;
+    private static final long BOUND_SUBGRAPH = 10000000;
+
+    private static final int SUB_GRAPH_LINES_PER_STEP = 2000;
+    private static final int SUB_GRAPH_NUM_STEPS = 5;
 
     private static void compare() throws IOException {
         CompressionStarter hdtStarter = new HDTStarter();
         CompressionStarter grpStarter = new GraphRePairStarter();
 
-        List<File> subgraphs = buildEntityBasedSubGraphs();
-        List<Result> featureResults = analyzeFiles(subgraphs);
+        List<File> preparedGraphs = prepareGraphs();
+        List<Result> featureResults = analyzeFiles(preparedGraphs);
+
 
         List<CompressionResult> resultsHDT = new ArrayList<>();
         List<CompressionResult> resultsGRP = new ArrayList<>();
 
-        for (File file : subgraphs) {
+        List<Double> lstStarSims = new ArrayList<>();
+        for (File file : preparedGraphs) {
+            CompressionResult resultHDT, resultGRP;
             try {
-                resultsGRP.add(grpStarter.compress(file.getAbsolutePath(), null, false));
-                resultsHDT.add(hdtStarter.compress(file.getAbsolutePath(), "current.hdt", false));
+                final boolean addDictSize = false;
+                resultHDT = hdtStarter.compress(file.getAbsolutePath(), "current.hdt", addDictSize);
+                resultGRP = grpStarter.compress(file.getAbsolutePath(), null, addDictSize);
             } catch (Exception e) {
-                continue;
+                throw new RuntimeException("Compression exception for file " + file.getName());
             }
+            resultsHDT.add(resultHDT);
+            resultsGRP.add(resultGRP);
+            lstStarSims.add(StarPatternAnalyzer.analyzeStarSimilarity(file.getAbsolutePath()));
         }
 
         System.out.println("\n\n-------\n\nHDT compr ratios");
         for (int i = 0; i < resultsHDT.size(); i++) {
-            System.out.print(resultsHDT.get(i).getCompressionRatio()+",");
+            System.out.print(resultsHDT.get(i).getCompressionRatio() + ",");
         }
         System.out.println("\nGRP compr ratios");
-        for (int i = 0; i < resultsHDT.size(); i++) {
-            System.out.print(resultsGRP.get(i).getCompressionRatio()+",");
+        for (int i = 0; i < resultsGRP.size(); i++) {
+            System.out.print(resultsGRP.get(i).getCompressionRatio() + ",");
         }
         System.out.println("\nedge label ratios");
         for (int i = 0; i < resultsHDT.size(); i++) {
-            System.out.print(featureResults.get(i).predicateRatio+",");
+            System.out.print(featureResults.get(i).predicateRatio + ",");
         }
 
+        System.out.println("\nstar similarities");
+        for (int i = 0; i < lstStarSims.size(); i++) {
+            System.out.print(lstStarSims.get(i) + ",");
+        }
+        System.out.println();
 
-        for(File file: filesToRemove){
+
+        for (File file : filesToRemove) {
             file.delete();
         }
 
+        writeResultsToFiles(resultsHDT,resultsGRP,featureResults,lstStarSims);
+
     }
 
-    private static List<File> buildEntityBasedSubGraphs() throws IOException {
+    private static void writeResultsToFiles(List<CompressionResult> resultsHDT, List<CompressionResult> resultsGRP,
+                                            List<Result> featureResults, List<Double> lstStarSims) throws IOException {
+        File file1 = new File("HDTAndGRPCompareResults/hdtRatios");
+        File file2 = new File("HDTAndGRPCompareResults/grpRatios");
+        File file3 = new File("HDTAndGRPCompareResults/edgeLabelRatios");
+        File file4 = new File("HDTAndGRPCompareResults/starSimis");
+
+        file1.delete();
+        file2.delete();
+        file3.delete();
+        file4.delete();
+
+
+        StringBuilder sb = new StringBuilder();
+        resultsHDT.forEach(r -> sb.append(r.getCompressionRatio()+","));
+        Files.write(Paths.get(file1.getAbsolutePath()), sb.toString().getBytes(),StandardOpenOption.CREATE);
+
+        sb.delete(0,sb.length());
+        resultsGRP.forEach(r -> sb.append(r.getCompressionRatio()+","));
+        Files.write(Paths.get(file2.getAbsolutePath()), sb.toString().getBytes(),StandardOpenOption.CREATE);
+
+        sb.delete(0,sb.length());
+        featureResults.forEach(r -> sb.append(r.predicateRatio+","));
+        Files.write(Paths.get(file3.getAbsolutePath()), sb.toString().getBytes(),StandardOpenOption.CREATE);
+
+        sb.delete(0,sb.length());
+        lstStarSims.forEach(r -> sb.append(r+","));
+        Files.write(Paths.get(file4.getAbsolutePath()), sb.toString().getBytes(),StandardOpenOption.CREATE);
+
+    }
+
+    private static List<File> prepareGraphs() throws IOException {
 
         final String ending = ".sub.ttl";
         for (File file : new File(DIRECTORY).listFiles()) {
@@ -73,28 +125,34 @@ public class HDTAndGRPComparer {
         }
 
         List<File> originals = Util.listFilesSorted(DIRECTORY);
-        List<File> subgraphs = new ArrayList<>();
+        List<File> editedGraphs = new ArrayList<>();
 
-        for (File original : originals) {
+        for (File file : originals) {
 
-            if (original.getAbsolutePath().endsWith(".rdf")||original.getAbsolutePath().endsWith(".owl")) {
-                original = RDFTurtleConverter.convertAndStoreAsNTriples(original.getAbsolutePath());
-                filesToRemove.add(original);
+            String[] allowedSuffixes = {".nt", ".ttl", ".rdf", ".owl"};
+            if (!Util.isSuffixAllowed(file.getAbsolutePath(), allowedSuffixes)) {
+                System.out.println("Skipping file " + file.getName());
+                continue;
             }
-            if (original.getAbsolutePath().endsWith(".ttl")||original.getAbsolutePath().endsWith(".nt")) {
-                if (original.length()>BOUND_SUBGRAPH) {
-                    String entity = Util.getEntityFromGraph(original.getAbsolutePath());
-                    String outPath = original.getAbsolutePath() + ending;
-                    Util.createEntityBasedSubGraph(entity, original.getAbsolutePath(), outPath, 5, 2000);
-                    subgraphs.add(new File(outPath));
-                } else {
-                    subgraphs.add(original);
-                }
+
+            if (!Util.isFileInNTriplesFormat(file.getAbsolutePath())) {
+                System.out.println("Converting file " + file.getName());
+                File converted = RDFTurtleConverter.convertAndStoreAsNTriples(file.getAbsolutePath());
+                filesToRemove.add(converted);
+                file = converted;
+            }
+            if (file.length() > BOUND_SUBGRAPH) {
+                System.out.println("Building sub graph for file " + file.getName());
+                String entity = Util.getMostFrequentEntityFromGraph(file.getAbsolutePath());
+                String outPath = file.getAbsolutePath() + ending;
+                Util.createEntityBasedSubGraph(entity, file.getAbsolutePath(), outPath, SUB_GRAPH_NUM_STEPS, SUB_GRAPH_LINES_PER_STEP);
+                editedGraphs.add(new File(outPath));
             } else {
-                System.out.println("Skipping file " + original.getName());
+                editedGraphs.add(file);
             }
+
         }
-        return subgraphs;
+        return editedGraphs;
     }
 
     private static List<Result> analyzeFiles(List<File> files) {
@@ -105,19 +163,19 @@ public class HDTAndGRPComparer {
             Set<String> foundEdgeUris = new HashSet<>();
             Set<String> foundNodeUris = new HashSet<>();
             ExtendedIterator<Triple> iterator = model.getGraph().find();
-            while(iterator.hasNext()){
+            while (iterator.hasNext()) {
                 Triple triple = iterator.next();
                 String uri = triple.getPredicate().getURI();
                 foundEdgeUris.add(uri);
-                if(triple.getSubject().isURI()){
+                if (triple.getSubject().isURI()) {
                     foundNodeUris.add(triple.getSubject().getURI());
                 }
-                if(triple.getObject().isURI()){
+                if (triple.getObject().isURI()) {
                     foundNodeUris.add(triple.getObject().getURI());
                 }
             }
             int size = model.getGraph().size();
-            results.add(new Result(1.0*foundEdgeUris.size()/size, 1.0*foundNodeUris.size(),size));
+            results.add(new Result(1.0 * foundEdgeUris.size() / size, 1.0 * foundNodeUris.size(), size));
         }
         return results;
     }
@@ -134,8 +192,8 @@ public class HDTAndGRPComparer {
 
         public Result(double predicateRatio, double nodeLabelRatio, int numTriples) {
             this.predicateRatio = predicateRatio;
-            this.nodeLabelRatio= nodeLabelRatio;
-            this.numTriples=numTriples;
+            this.nodeLabelRatio = nodeLabelRatio;
+            this.numTriples = numTriples;
         }
     }
 }

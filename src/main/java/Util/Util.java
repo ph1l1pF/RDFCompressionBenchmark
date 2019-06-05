@@ -134,7 +134,7 @@ public class Util {
         }
     }
 
-    public static String getEntityFromGraph(String filePath) {
+    public static String getMostFrequentEntityFromGraph(String filePath) {
         FileReader fi=null;
         BufferedReader bufferedReader=null;
         try {
@@ -309,6 +309,31 @@ public class Util {
         return getModelFromFile(tempfile.getAbsolutePath());
     }
 
+    public static boolean isFileInNTriplesFormat(String file){
+        FileReader fi = null;
+        BufferedReader bufferedReader = null;
+        try {
+
+            fi = new FileReader(file);
+            bufferedReader= new BufferedReader(fi);
+
+            bufferedReader.readLine();
+            String line = bufferedReader.readLine();
+            return !line.startsWith("@")&&line.contains("<") && line.contains(">") && line.endsWith(".");
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                bufferedReader.close();
+                fi.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return false;
+    }
+
     public static Model streamModelFromFile(String file, int numTriples) {
         FileReader fi = null;
         BufferedReader bufferedReader = null;
@@ -432,7 +457,7 @@ public class Util {
         return files;
     }
 
-    private static boolean isSuffixAllowed(String file, String[] allowedSuffices) {
+    public static boolean isSuffixAllowed(String file, String[] allowedSuffices) {
         for (String allowedSuffix : allowedSuffices) {
             if (file.endsWith(allowedSuffix)) {
                 return true;

@@ -8,6 +8,7 @@ import org.apache.jena.graph.Node_Literal;
 import org.apache.jena.graph.Triple;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
+import org.apache.jena.util.FileUtils;
 import org.apache.jena.util.iterator.ExtendedIterator;
 
 import java.io.*;
@@ -32,7 +33,7 @@ public class RDFTurtleConverter {
 
     public static File convertAndStoreAsNTriples(String filePath){
         Model modelFromFile = Util.getModelFromFile(filePath);
-        File file = new File(filePath + ".ttl");
+        File file = new File(filePath + ".nt");
         Util.writeModelToFile(file,modelFromFile);
         return file;
     }

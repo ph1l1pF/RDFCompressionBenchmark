@@ -59,7 +59,6 @@ public class GraphRePairStarter implements CompressionStarter {
 
 
         for (File file : outputFiles) {
-            System.out.println(file.getName() + " : " + file.length());
             compressedSize += file.length();
         }
 

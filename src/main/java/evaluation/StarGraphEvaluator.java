@@ -15,11 +15,12 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 public class StarGraphEvaluator {
 
     private static int numTriples = -1;
+
+    private static List<Double> lstStartPatternSimilarities = new ArrayList<>();
 
     private static EvalResult evaluateStarGraphs(int numPredicates) {
         List<List<Triple>> graphs = StarPatternGenerator.generateMultipleStarPatternGraphsWithFixedSize();
@@ -59,6 +60,8 @@ public class StarGraphEvaluator {
             String filePath = "file.ttl";
             Util.Util.writeTriplesToFile(graph, filePath);
 
+            lstStartPatternSimilarities.add(StarPatternAnalyzer.analyzeStarSimilarity(filePath));
+
             final boolean addDictSize = true;
 
             HDTStarter hdtStarter = new HDTStarter();
@@ -67,8 +70,8 @@ public class StarGraphEvaluator {
             GraphRePairStarter graphRePairStarter = new GraphRePairStarter();
             compressionResultsGRP.add(graphRePairStarter.compress(filePath, null, addDictSize));
 
-//            GzipStarter gzipStarter = new GzipStarter();
-//            compressionResultsGzip.add(gzipStarter.compress(filePath, "fileCompressedWithGzip.gzip", true));
+            GzipStarter gzipStarter = new GzipStarter();
+            compressionResultsGzip.add(gzipStarter.compress(filePath, "fileCompressedWithGzip.gzip", addDictSize));
 
             System.out.println("\n\n\n\n-----------------------");
             System.out.println(100.0 * count / graphs.size() + "% done");
@@ -77,6 +80,10 @@ public class StarGraphEvaluator {
         }
 
 //        printResults(compressionResultsHDT, compressionResultsGRP, compressionResultsGzip);
+
+        for(double starPa : lstStartPatternSimilarities){
+            System.out.print(starPa+",");
+        }
 
         return new EvalResult(compressionResultsHDT, compressionResultsGRP, compressionResultsGzip);
     }
