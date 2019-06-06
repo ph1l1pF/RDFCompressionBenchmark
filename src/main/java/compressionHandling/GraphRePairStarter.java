@@ -13,10 +13,23 @@ public class GraphRePairStarter implements CompressionStarter {
 
     private int maxRank;
 
+    private  boolean omitBlankNodeIds=false;
+    private boolean huffmanActive=false;
+
+
     public GraphRePairStarter() {
         // standard value
         maxRank = 4;
+
     }
+
+
+    public GraphRePairStarter(boolean omitBlankNodeIds, boolean huffmanActive) {
+        this.omitBlankNodeIds = omitBlankNodeIds;
+        this.huffmanActive = huffmanActive;
+    }
+
+
 
 
     public GraphRePairStarter(int maxRank) {
@@ -77,12 +90,35 @@ public class GraphRePairStarter implements CompressionStarter {
         return System.currentTimeMillis() - time;
     }
 
-    private static long getHDTDictionarySize(String filePath) {
+    private long getHDTDictionarySize(String filePath) {
         File outputFile = new File(filePath + ".hdt");
-        CompressionResult compressionResult = new HDTStarter().compress(filePath, outputFile.getAbsolutePath(), true);
+        CompressionResult compressionResult = new HDTStarter(omitBlankNodeIds, huffmanActive).compress(filePath, outputFile.getAbsolutePath(), true);
         outputFile.delete();
         return compressionResult.getCompressionDictionarySize();
     }
 
 
+    public int getMaxRank() {
+        return maxRank;
+    }
+
+    public void setMaxRank(int maxRank) {
+        this.maxRank = maxRank;
+    }
+
+    public boolean isOmitBlankNodeIds() {
+        return omitBlankNodeIds;
+    }
+
+    public void setOmitBlankNodeIds(boolean omitBlankNodeIds) {
+        this.omitBlankNodeIds = omitBlankNodeIds;
+    }
+
+    public boolean isHuffmanActive() {
+        return huffmanActive;
+    }
+
+    public void setHuffmanActive(boolean huffmanActive) {
+        this.huffmanActive = huffmanActive;
+    }
 }

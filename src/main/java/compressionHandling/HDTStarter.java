@@ -1,5 +1,7 @@
 package compressionHandling;
 
+import org.rdfhdt.hdt.dictionary.impl.BlankAndHuffmanEvaluator;
+import org.rdfhdt.hdt.dictionary.impl.HuffmanFacade;
 import org.rdfhdt.hdt.enums.RDFNotation;
 import org.rdfhdt.hdt.exceptions.ParserException;
 import org.rdfhdt.hdt.hdt.HDT;
@@ -8,20 +10,46 @@ import org.rdfhdt.hdt.options.HDTSpecification;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class HDTStarter implements CompressionStarter {
 
     private final Map<String, String> mapSuffixToFormat = new HashMap<>();
 
+    private boolean omitBlankNodeIds;
+    private boolean huffmanActive;
+
+
+    public HDTStarter(boolean omitBlankNodeIds, boolean huffmanActive) {
+        this.omitBlankNodeIds = omitBlankNodeIds;
+        this.huffmanActive = huffmanActive;
+        fillSuffixMap();
+    }
+
     public HDTStarter() {
+        omitBlankNodeIds = false;
+        huffmanActive = false;
+        fillSuffixMap();
+    }
+
+    private void fillSuffixMap() {
         final String NTRIPLES = "ntriples";
         final String RDF_XML = "rdf-xml";
         mapSuffixToFormat.put("ttl", NTRIPLES);
         mapSuffixToFormat.put("nt", NTRIPLES);
         mapSuffixToFormat.put("inf", NTRIPLES);
         mapSuffixToFormat.put("rdf", RDF_XML);
+    }
+
+    private List<File> getHuffmanOutputFiles() {
+        List<File> files = new ArrayList<>();
+        files.add(new File(HuffmanFacade.FILE_LITERALS));
+        files.add(new File(HuffmanFacade.FILE_TREE));
+        files.add(new File(HuffmanFacade.FILE_CHARS));
+        return files;
     }
 
     public CompressionResult compress(String filePath, String outputName, boolean addDictionarySizeToCompressedSize) {
@@ -35,6 +63,9 @@ public class HDTStarter implements CompressionStarter {
             throw new IllegalArgumentException("Invalid format: " + getFileSuffix(filePath));
         }
 
+        List<File> huffmanOutputFiles = getHuffmanOutputFiles();
+        huffmanOutputFiles.forEach(x -> x.delete());
+
         File inputFile = new File(filePath);
         File outputFile = null;
 
@@ -47,6 +78,14 @@ public class HDTStarter implements CompressionStarter {
             }
 
             compressionTime = System.currentTimeMillis();
+
+            if (huffmanActive) {
+                BlankAndHuffmanEvaluator.HUFFMAN_ACTIVE = true;
+                HuffmanFacade.findCharacterCounts(filePath);
+            }
+            if (omitBlankNodeIds) {
+                BlankAndHuffmanEvaluator.BLANK_OMIT_ACTIVE = true;
+            }
 
             hdt = HDTManager.generateHDT(
                     rdfInput,         // Input RDF File
@@ -65,16 +104,28 @@ public class HDTStarter implements CompressionStarter {
             e.printStackTrace();
         }
 
-        // OPTIONAL: Add additional domain-specific properties to the header:
-        //Header header = hdt.getHeader();
-        //header.insert("myResource1", "property" , "value");
-
         long compressedSize = outputFile.length();
-        if (!addDictionarySizeToCompressedSize) {
-            compressedSize -= hdt.getDictionary().size();
+        outputFile.delete();
+
+        long dictSize = hdt.getDictionary().size();
+        compressedSize -= dictSize;
+
+        if (huffmanActive) {
+            if (!addDictionarySizeToCompressedSize) {
+                throw new RuntimeException("makes no sense");
+            }
+            for (File huffFile : huffmanOutputFiles) {
+                dictSize += huffFile.length();
+            }
+            huffmanOutputFiles.forEach(x -> x.delete());
+
         }
 
-        return new CompressionResult(inputFile.length(), compressedSize, hdt.getDictionary().size(), compressionTime, -1, inputFile.getAbsolutePath());
+        if (addDictionarySizeToCompressedSize) {
+            compressedSize += dictSize;
+        }
+
+        return new CompressionResult(inputFile.length(), compressedSize, dictSize, compressionTime, -1, inputFile.getAbsolutePath());
     }
 
     private static String getFileSuffix(String filePath) {
@@ -84,6 +135,24 @@ public class HDTStarter implements CompressionStarter {
 
 
     public long decompress(String filePath) {
-        return 0;
+        throw new RuntimeException("not impl");
     }
+
+    public Map<String, String> getMapSuffixToFormat() {
+        return mapSuffixToFormat;
+    }
+
+    public boolean isOmitBlankNodeIds() {
+        return omitBlankNodeIds;
+    }
+
+    public boolean isHuffmanActive() {
+        return huffmanActive;
+    }
+
+    public void setHuffmanActive(boolean huffmanActive) {
+        this.huffmanActive = huffmanActive;
+    }
+
+
 }

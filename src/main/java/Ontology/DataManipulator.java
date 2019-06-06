@@ -134,7 +134,7 @@ public class DataManipulator {
 //        DataReplacer.materializeInverse(inversePredicatesDBPedia,modelFromFile,false);
 //        Util.writeModelToFile(new File("mappingbased-properties_en_manyinverses_alledgesremoved.ttl"),modelFromFile);
 
-        storeSubModel("mappingbased-properties_en.ttl", "mappingbased-properties_en_manyinversesBigger.ttl", DataReplacer.lstDBPediaInversePredicates, 50000, 1000);
+        storeSubModel("mappingbased-properties_en.ttl", "finalGraph/mappingbased-properties_en_manyinversesBigger.ttl", DataReplacer.lstDBPediaInversePredicates, 50000, 10000);
 
     }
 }
