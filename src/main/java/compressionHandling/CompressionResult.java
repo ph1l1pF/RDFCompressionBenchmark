@@ -32,6 +32,10 @@ public class CompressionResult implements Comparable {
         return 1.0*compressedSize/originalSize;
     }
 
+    public double getCompressionRatioRalatedToDict(){
+        return 1.0*compressionDictionarySize/originalSize;
+    }
+
     public long getOriginalSize() {
         return originalSize;
     }

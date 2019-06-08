@@ -1,5 +1,6 @@
 package compressionHandling;
 
+import org.apache.jena.base.Sys;
 import org.rdfhdt.hdt.dictionary.impl.BlankAndHuffmanEvaluator;
 import org.rdfhdt.hdt.dictionary.impl.HuffmanFacade;
 import org.rdfhdt.hdt.enums.RDFNotation;
@@ -79,13 +80,12 @@ public class HDTStarter implements CompressionStarter {
 
             compressionTime = System.currentTimeMillis();
 
+            BlankAndHuffmanEvaluator.HUFFMAN_ACTIVE = huffmanActive;
             if (huffmanActive) {
-                BlankAndHuffmanEvaluator.HUFFMAN_ACTIVE = true;
                 HuffmanFacade.findCharacterCounts(filePath);
             }
-            if (omitBlankNodeIds) {
-                BlankAndHuffmanEvaluator.BLANK_OMIT_ACTIVE = true;
-            }
+
+            BlankAndHuffmanEvaluator.BLANK_OMIT_ACTIVE = omitBlankNodeIds;
 
             hdt = HDTManager.generateHDT(
                     rdfInput,         // Input RDF File
@@ -154,5 +154,8 @@ public class HDTStarter implements CompressionStarter {
         this.huffmanActive = huffmanActive;
     }
 
+    public void setOmitBlankNodeIds(boolean omitBlankNodeIds) {
+        this.omitBlankNodeIds = omitBlankNodeIds;
+    }
 
 }

@@ -19,7 +19,7 @@ public class GzipStarter implements CompressionStarter {
                 }
             }
 
-            compressionTime = System.currentTimeMillis()-compressionTime;
+            compressionTime = System.currentTimeMillis() - compressionTime;
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (IOException e) {
@@ -29,7 +29,7 @@ public class GzipStarter implements CompressionStarter {
         File inputFile = new File(filePath);
         File outputFile = new File(outputName);
 
-        return new CompressionResult(inputFile.length(), outputFile.length(), -1, compressionTime, -1,inputFile.getAbsolutePath());
+        return new CompressionResult(inputFile.length(), outputFile.length(), -1, compressionTime, -1, inputFile.getAbsolutePath());
 
 
     }
@@ -37,5 +37,11 @@ public class GzipStarter implements CompressionStarter {
     @Override
     public long decompress(String filePath) {
         return 0;
+    }
+
+
+    public static void main(String[] a) {
+        GzipStarter gzipStarter = new GzipStarter();
+        gzipStarter.compress("/Users/philipfrerk/github/MastersThesisNew/thesis/figures/4_evaluation/final", "lo", true);
     }
 }
