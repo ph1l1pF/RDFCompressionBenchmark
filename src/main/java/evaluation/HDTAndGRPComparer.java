@@ -21,7 +21,10 @@ import java.util.Set;
 
 public class HDTAndGRPComparer {
 
-    private static final String DIRECTORY = "/Users/philipfrerk/Documents/RDF_data/opendata";
+    private static final String DIRECTORY = "/Users/philipfrerk/Documents/RDF_data/Comparison/Wikidata";
+
+    private static final boolean DIR_OF_DIRS = false;
+
 
     private static List<File> filesToRemove = new ArrayList<>();
 

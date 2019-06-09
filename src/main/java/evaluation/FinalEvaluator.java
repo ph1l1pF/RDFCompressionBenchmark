@@ -32,8 +32,8 @@ public class FinalEvaluator {
         double dictSizeNormal = new HDTStarter().compress(FILE_FINAL_ONTOLOGY_MANIPULATED, "bla.hdt", false).getCompressedSize();
         System.out.println(new File(FILE_FINAL).length());
 
-        ZipStarter gzipStarter = new ZipStarter();
-        System.out.println(gzipStarter.compress(FILE_FINAL, "bla.gzp", true).getCompressionRatio());
+//        ZipStarter gzipStarter = new ZipStarter();
+//        System.out.println(gzipStarter.compress(FILE_FINAL, "bla.gzp", true).getCompressionRatio());
 
 //        GraphRePairStarter graphRePairStarter = new GraphRePairStarter();
 //        double sizeGRPNormal =graphRePairStarter.compress(FILE_FINAL, null, false).getCompressedSize();
