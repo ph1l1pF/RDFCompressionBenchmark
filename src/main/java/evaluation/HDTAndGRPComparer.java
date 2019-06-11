@@ -21,7 +21,7 @@ import java.util.Set;
 
 public class HDTAndGRPComparer {
 
-    private static final String DIRECTORY = "/Users/philipfrerk/Documents/RDF_data/Comparison/Wikidata";
+    private static final String DIRECTORY = "/Users/philipfrerk/Documents/RDF_data/Comparison/opendata";
 
     private static final boolean DIR_OF_DIRS = false;
 
@@ -32,6 +32,7 @@ public class HDTAndGRPComparer {
 
     private static final int SUB_GRAPH_LINES_PER_STEP = 2000;
     private static final int SUB_GRAPH_NUM_STEPS = 5;
+    private static final int NUM_TRIPLES = 50000;
 
     private static void compare() throws IOException {
         CompressionStarter hdtStarter = new HDTStarter();
@@ -152,9 +153,10 @@ public class HDTAndGRPComparer {
             }
             if (file.length() > BOUND_SUBGRAPH) {
                 System.out.println("Building sub graph for file " + file.getName());
-                String entity = Util.getMostFrequentEntityFromGraph(file.getAbsolutePath());
                 String outPath = file.getAbsolutePath() + ending;
-                Util.createEntityBasedSubGraph(entity, file.getAbsolutePath(), outPath, SUB_GRAPH_NUM_STEPS, SUB_GRAPH_LINES_PER_STEP);
+
+                Model model = Util.streamModelFromFile(file.getAbsolutePath(), NUM_TRIPLES);
+                Util.writeModelToFile(new File(outPath), model);
                 editedGraphs.add(new File(outPath));
             } else {
                 editedGraphs.add(file);

@@ -8,6 +8,8 @@ import org.rdfhdt.hdt.exceptions.ParserException;
 import org.rdfhdt.hdt.hdt.HDT;
 import org.rdfhdt.hdt.hdt.HDTManager;
 import org.rdfhdt.hdt.options.HDTSpecification;
+import org.rdfhdt.hdt.triples.IteratorTripleID;
+import org.rdfhdt.hdt.triples.TripleID;
 
 import java.io.File;
 import java.io.IOException;
@@ -135,6 +137,17 @@ public class HDTStarter implements CompressionStarter {
 
 
     public long decompress(String filePath) {
+//        try {
+//            HDT hdt = HDTManager.loadHDT("data/example.hdt", null);
+//            IteratorTripleID iteratorTripleID = hdt.getTriples().searchAll();
+//            while(iteratorTripleID.hasNext()){
+//                TripleID next = iteratorTripleID.next();
+//                next.
+//            }
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+
         throw new RuntimeException("not impl");
     }
 
