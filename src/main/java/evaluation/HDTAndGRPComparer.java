@@ -22,7 +22,8 @@ import java.util.Set;
 
 public class HDTAndGRPComparer {
 
-    private static final String DIRECTORY = "finalGraph";
+    private static final String DIRECTORY = Paths.get(".").toAbsolutePath().normalize().toString();
+    ;
 
     private static final boolean COMPRESSION_ACTIVE = false;
 
