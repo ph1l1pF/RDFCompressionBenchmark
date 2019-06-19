@@ -1,6 +1,5 @@
 package compressionHandling;
 
-import org.apache.jena.base.Sys;
 import org.rdfhdt.hdt.dictionary.impl.BlankAndHuffmanEvaluator;
 import org.rdfhdt.hdt.dictionary.impl.HuffmanFacade;
 import org.rdfhdt.hdt.enums.RDFNotation;
@@ -8,8 +7,6 @@ import org.rdfhdt.hdt.exceptions.ParserException;
 import org.rdfhdt.hdt.hdt.HDT;
 import org.rdfhdt.hdt.hdt.HDTManager;
 import org.rdfhdt.hdt.options.HDTSpecification;
-import org.rdfhdt.hdt.triples.IteratorTripleID;
-import org.rdfhdt.hdt.triples.TripleID;
 
 import java.io.File;
 import java.io.IOException;
@@ -23,6 +20,7 @@ public class HDTStarter implements CompressionStarter {
     private final Map<String, String> mapSuffixToFormat = new HashMap<>();
 
     private boolean omitBlankNodeIds;
+    private boolean shortBlankNodeIds;
     private boolean huffmanActive;
 
 
@@ -41,7 +39,8 @@ public class HDTStarter implements CompressionStarter {
     private void fillSuffixMap() {
         final String NTRIPLES = "ntriples";
         final String RDF_XML = "rdf-xml";
-        mapSuffixToFormat.put("ttl", NTRIPLES);
+        final String TURTLE = "turtle";
+        mapSuffixToFormat.put("ttl", TURTLE);
         mapSuffixToFormat.put("nt", NTRIPLES);
         mapSuffixToFormat.put("inf", NTRIPLES);
         mapSuffixToFormat.put("rdf", RDF_XML);
@@ -87,6 +86,7 @@ public class HDTStarter implements CompressionStarter {
                 HuffmanFacade.findCharacterCounts(filePath);
             }
 
+            BlankAndHuffmanEvaluator.BLANK_SHORT_ACTIVE = shortBlankNodeIds;
             BlankAndHuffmanEvaluator.BLANK_OMIT_ACTIVE = omitBlankNodeIds;
 
             hdt = HDTManager.generateHDT(
@@ -137,16 +137,6 @@ public class HDTStarter implements CompressionStarter {
 
 
     public long decompress(String filePath) {
-//        try {
-//            HDT hdt = HDTManager.loadHDT("data/example.hdt", null);
-//            IteratorTripleID iteratorTripleID = hdt.getTriples().searchAll();
-//            while(iteratorTripleID.hasNext()){
-//                TripleID next = iteratorTripleID.next();
-//                next.
-//            }
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
 
         throw new RuntimeException("not impl");
     }
@@ -170,5 +160,10 @@ public class HDTStarter implements CompressionStarter {
     public void setOmitBlankNodeIds(boolean omitBlankNodeIds) {
         this.omitBlankNodeIds = omitBlankNodeIds;
     }
+
+    public void setShortBlankNodeIds(boolean shortBlankNodeIds) {
+        this.shortBlankNodeIds = shortBlankNodeIds;
+    }
+
 
 }

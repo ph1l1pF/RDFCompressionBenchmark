@@ -1,7 +1,5 @@
 package Util;
 
-import compressionHandling.GraphRePairStarter;
-import org.apache.jena.base.Sys;
 import org.apache.jena.ext.com.google.common.io.Files;
 import org.apache.jena.graph.Graph;
 import org.apache.jena.rdf.model.Model;
@@ -10,7 +8,6 @@ import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.riot.system.StreamRDFBase;
 import org.apache.jena.sparql.graph.GraphFactory;
 import org.apache.jena.util.iterator.ExtendedIterator;
-import sun.util.resources.cldr.zh.CalendarData_zh_Hans_HK;
 
 import javax.mail.*;
 import javax.mail.internet.InternetAddress;
@@ -18,7 +15,6 @@ import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 import java.io.*;
-import java.nio.charset.Charset;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.*;
@@ -64,6 +60,7 @@ public class Util {
         return r.nextInt((max - min) + 1) + min;
     }
 
+
     public static void removeIntFromList(List<Integer> list, int intToRemove) {
         for (int i = 0; i < list.size(); i++) {
             if (list.get(i) == intToRemove) {
@@ -73,10 +70,40 @@ public class Util {
         }
     }
 
+    public static String getFileNameWithoutSuffix(String file){
+        String[] split = file.split("\\.");
+        String nameWithoutSuffix = "";
+        for (int i = 0; i < split.length-1; i++) {
+            nameWithoutSuffix+=split[i];
+            if(i<split.length-2){
+                nameWithoutSuffix+=".";
+            }
+        }
+        return nameWithoutSuffix;
+    }
+
+    public static String getParentDirectory(String file){
+        String[] split = file.split("/");
+        String parentDir = "";
+        for (int i = 0; i < split.length-1; i++) {
+            parentDir+=split[i];
+            if(i<split.length-2){
+                parentDir+="/";
+            }
+        }
+        return parentDir;
+    }
+
     public static List<File> listFilesSorted(String dir) {
         List<File> files = Arrays.asList(new File(dir).listFiles());
-        Collections.sort(files);
-        return files;
+        List<File> filesNew = new ArrayList<>();
+        for(int i = 0;i<files.size();i++){
+            if(!files.get(i).getName().toLowerCase().contains("ds_store")){
+                filesNew.add(files.get(i));
+            }
+        }
+        Collections.sort(filesNew);
+        return filesNew;
     }
 
     public static Model getModelFromFile(String filePath) {
@@ -392,8 +419,9 @@ public class Util {
             }
 
             Files.write(sb.toString().getBytes(), tempfile);
-            return getModelFromFile(tempfile.getAbsolutePath());
-
+            Model model = getModelFromFile(tempfile.getAbsolutePath());
+            tempfile.delete();
+            return model;
         } catch (IOException e) {
             e.printStackTrace();
             return null;

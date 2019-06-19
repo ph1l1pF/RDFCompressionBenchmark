@@ -1,11 +1,8 @@
 package compressionHandling;
 
-import GraphRePair.GraphStatistics;
 import GraphRePair.Start;
-import org.apache.commons.io.FileUtils;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -75,18 +72,17 @@ public class GraphRePairStarter implements CompressionStarter {
             compressedSize += file.length();
         }
 
-        for (File file : outputFiles) {
-            file.delete();
-        }
+//        for (File file : outputFiles) {
+//            file.delete();
+//        }
 
 
         return new CompressionResult(originalSize, compressedSize, dictionarySize, compressionTime, -1, inputFile.getAbsolutePath());
     }
 
-    public long decompress(String file) {
+    public long decompress(String grammarBaseName) {
         long time = System.currentTimeMillis();
-        Start.main(new String[]{"decompress output/", file, "out=" + "lo"});
-
+        Start.main(new String[]{"decompress", grammarBaseName, "out=" + "lo"});
         return System.currentTimeMillis() - time;
     }
 

@@ -28,7 +28,7 @@ public class CompressionEvaluator {
     Configurations
      */
 
-    private static final String FILE_TO_EVALUATE = "mappingbased-properties_en_manyinversesBigger.ttl";
+    private static final String FILE_TO_EVALUATE = "mappingbased-properties_en_manyinversesBigger_alledgesremoved.ttl";
 
     private static final boolean EVALUATE_CURRENT_DICT = false;
 

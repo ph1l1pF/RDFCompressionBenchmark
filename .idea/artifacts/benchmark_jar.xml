@@ -3,6 +3,8 @@
     <output-path>$PROJECT_DIR$/out/artifacts/benchmark_jar</output-path>
     <root id="archive" name="benchmark.jar">
       <element id="module-output" name="benchmark" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/GraphRePair-assembly-0.1.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$MAVEN_REPOSITORY$/javax/mail/mail/1.5.0-b01/mail-1.5.0-b01.jar" path-in-jar="/" />
       <element id="extracted-dir" path="$PROJECT_DIR$/lib/xz-1.6.jar" path-in-jar="/" />
       <element id="extracted-dir" path="$PROJECT_DIR$/lib/objenesis-2.6.jar" path-in-jar="/" />
       <element id="extracted-dir" path="$PROJECT_DIR$/lib/collection-0.7.jar" path-in-jar="/" />
@@ -38,8 +40,8 @@
       <element id="extracted-dir" path="$PROJECT_DIR$/lib/hdt-java-cli-2.1-SNAPSHOT.jar" path-in-jar="/" />
       <element id="extracted-dir" path="$PROJECT_DIR$/lib/jackson-annotations-2.9.0.jar" path-in-jar="/" />
       <element id="extracted-dir" path="$PROJECT_DIR$/lib/hdt-java-core-2.1-SNAPSHOT.jar" path-in-jar="/" />
-      <element id="extracted-dir" path="$PROJECT_DIR$/GraphRePair.jar" path-in-jar="/" />
       <element id="extracted-dir" path="$MAVEN_REPOSITORY$/commons-io/commons-io/2.6/commons-io-2.6.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$MAVEN_REPOSITORY$/javax/activation/activation/1.1/activation-1.1.jar" path-in-jar="/" />
     </root>
   </artifact>
 </component>

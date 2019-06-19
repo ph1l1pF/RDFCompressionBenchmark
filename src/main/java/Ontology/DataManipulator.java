@@ -130,11 +130,11 @@ public class DataManipulator {
 //                symmetricPredicatesDbPedia,10000,10000);
 
 
-//        Model modelFromFile = Util.getModelFromFile("mappingbased-properties_en_manyinverses.ttl");
-//        DataReplacer.materializeInverse(inversePredicatesDBPedia,modelFromFile,false);
-//        Util.writeModelToFile(new File("mappingbased-properties_en_manyinverses_alledgesremoved.ttl"),modelFromFile);
+        Model modelFromFile = Util.getModelFromFile("mappingbased-properties_en_manyinversesBigger.ttl");
+        DataReplacer.materializeInverse(inversePredicatesDBPedia,modelFromFile,false);
+        Util.writeModelToFile(new File("mappingbased-properties_en_manyinversesBigger_alledgesremoved.ttl"),modelFromFile);
 
-        storeSubModel("mappingbased-properties_en.ttl", "finalGraph/mappingbased-properties_en_manyinversesBigger.ttl", DataReplacer.lstDBPediaInversePredicates, 50000, 10000);
+//        storeSubModel("mappingbased-properties_en.ttl", "finalGraph/mappingbased-properties_en_manyinversesBigger.ttl", DataReplacer.lstDBPediaInversePredicates, 50000, 10000);
 
     }
 }

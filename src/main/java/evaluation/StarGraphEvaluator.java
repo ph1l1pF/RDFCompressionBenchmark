@@ -49,6 +49,17 @@ public class StarGraphEvaluator {
 
     }
 
+    private static void evalDecompression() {
+        String dir = "stargraphs";
+        GraphRePairStarter graphRePairStarter = new GraphRePairStarter();
+        List<Long> decompressionTimes = new ArrayList<>();
+        for (int i = 5; i < new File(dir).listFiles().length; i++) {
+            String currFile = dir + "/" + i + "/file.ttl.gr.gr";
+            long time = graphRePairStarter.decompress(currFile);
+            decompressionTimes.add(time);
+        }
+    }
+
     private static EvalResult evaluateCompressors(List<List<Triple>> graphs) {
         List<CompressionResult> compressionResultsHDT = new ArrayList<>();
         List<CompressionResult> compressionResultsGRP = new ArrayList<>();
@@ -57,7 +68,13 @@ public class StarGraphEvaluator {
         int count = 0;
         for (List<Triple> graph : graphs) {
 
-            String filePath = "file.ttl";
+            String dir = "stargraphs/" + count;
+
+            if (!new File(dir).exists()) {
+                new File(dir).mkdir();
+
+            }
+            String filePath = dir + "/file.ttl";
             Util.Util.writeTriplesToFile(graph, filePath);
 
             lstStartPatternSimilarities.add(StarPatternAnalyzer.analyzeStarSimilarity(filePath));
@@ -81,8 +98,8 @@ public class StarGraphEvaluator {
 
 //        printResults(compressionResultsHDT, compressionResultsGRP, compressionResultsGzip);
 
-        for(double starPa : lstStartPatternSimilarities){
-            System.out.print(starPa+",");
+        for (double starPa : lstStartPatternSimilarities) {
+            System.out.print(starPa + ",");
         }
 
         return new EvalResult(compressionResultsHDT, compressionResultsGRP, compressionResultsGzip);
@@ -160,8 +177,8 @@ public class StarGraphEvaluator {
         }
     }
 
-    public static void main(String[] args) throws IOException {
-//        evaluatePredicateAmount();
+    private static void evalCompression() throws IOException {
+        //        evaluatePredicateAmount();
 
         // multiple runnings for runtime measurement
 
@@ -169,17 +186,17 @@ public class StarGraphEvaluator {
         int maxPredicateValue = -1;
         int i = 0;
         int indexHDTGetsBetter = -1;
-        for (int predicates = 1; predicates <=90; predicates += 15) {
+        for (int predicates = 1; predicates <= 1; predicates += 15) {
 
             EvalResult result = evaluateStarGraphs(predicates);
             evalResults.add(result);
 
             for (int j = 0; j < result.compressionResultsHDT.size(); j++) {
-                if(result.compressionResultsHDT.get(j).getCompressionRatio()<result.compressionResultsGRP.get(j).getCompressionRatio()){
-                    if(maxPredicateValue==-1) {
+                if (result.compressionResultsHDT.get(j).getCompressionRatio() < result.compressionResultsGRP.get(j).getCompressionRatio()) {
+                    if (maxPredicateValue == -1) {
                         maxPredicateValue = predicates;
                     }
-                    if(indexHDTGetsBetter==-1) {
+                    if (indexHDTGetsBetter == -1) {
                         indexHDTGetsBetter = i;
                     }
                 }
@@ -187,7 +204,7 @@ public class StarGraphEvaluator {
             i++;
         }
 
-        System.out.println("\nat this ELR HDT gets better: "+1.0*maxPredicateValue/numTriples);
+        System.out.println("\nat this ELR HDT gets better: " + 1.0 * maxPredicateValue / numTriples);
         System.out.println("at this index: " + indexHDTGetsBetter);
 
         File fileStarPatternResultsHDT = new File("starPatternResultsHDT.txt");
@@ -196,10 +213,10 @@ public class StarGraphEvaluator {
         fileStarPatternResultsGRP.delete();
 
         StringBuilder sb = new StringBuilder();
-        for(EvalResult evalResult : evalResults){
+        for (EvalResult evalResult : evalResults) {
 
-            for(CompressionResult resultHDT : evalResult.compressionResultsHDT){
-                sb.append(resultHDT.getCompressionRatio()+",");
+            for (CompressionResult resultHDT : evalResult.compressionResultsHDT) {
+                sb.append(resultHDT.getCompressionRatio() + ",");
             }
             sb.append("\n");
         }
@@ -208,14 +225,18 @@ public class StarGraphEvaluator {
         sb = new StringBuilder();
 
 
-        for(EvalResult evalResult : evalResults){
+        for (EvalResult evalResult : evalResults) {
 
-            for(CompressionResult resultGRP : evalResult.compressionResultsGRP){
-                sb.append(resultGRP.getCompressionRatio()+",");
+            for (CompressionResult resultGRP : evalResult.compressionResultsGRP) {
+                sb.append(resultGRP.getCompressionRatio() + ",");
             }
             sb.append("\n");
         }
         Files.write(sb.toString().getBytes(), fileStarPatternResultsGRP);
+    }
 
+    public static void main(String[] args) throws IOException {
+
+        evalDecompression();
     }
 }
