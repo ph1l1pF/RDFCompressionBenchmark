@@ -26,24 +26,53 @@ public class FinalEvaluator {
     }
 
     private static void evaluateCompleteCompressions() {
-//        double ratioHDTNormal = evaluateHDT(FILE_FINAL, true, false, false).getCompressionRatio();
-//        double ratioHDTImproved = evaluateHDT(FILE_FINAL, true, true, true).getCompressionRatio();
 
-        double dictSizeNormal = new HDTStarter().compress(FILE_FINAL_ONTOLOGY_MANIPULATED, "bla.hdt", false).getCompressedSize();
-        System.out.println(new File(FILE_FINAL).length());
+        long runTimeHDTNormal=0, runTimeHDTImpr=0, runTimeGRPNormal=0, runTimeGRPImpr=0, runTimeGzip=0;
 
-//        ZipStarter gzipStarter = new ZipStarter();
-//        System.out.println(gzipStarter.compress(FILE_FINAL, "bla.gzp", true).getCompressionRatio());
+        int numExecutions = 20;
+        for (int i = 0; i < numExecutions; i++) {
 
-//        GraphRePairStarter graphRePairStarter = new GraphRePairStarter();
-//        double sizeGRPNormal =graphRePairStarter.compress(FILE_FINAL, null, false).getCompressedSize();
-//        double sizeGRPOnt =graphRePairStarter.compress(FILE_FINAL_ONTOLOGY_MANIPULATED, null, false).getCompressedSize();
+            CompressionResult resultHDTNormal = evaluateHDT(FILE_FINAL, true, false, false);
+            runTimeHDTNormal+=resultHDTNormal.getCompressionTime();
+
+            double ratioHDTNormal = resultHDTNormal.getCompressionRatio();
+            CompressionResult resultHDTImproved = evaluateHDT(FILE_FINAL, true, true, true);
+            double ratioHDTImproved = resultHDTImproved.getCompressionRatio();
+            ratioHDTImproved+=resultHDTImproved.getCompressionTime();
+//        double dictSizeNormal = new HDTStarter().compress(FILE_FINAL_ONTOLOGY_MANIPULATED, "bla.hdt", false).getCompressedSize();
+//        System.out.println(new File(FILE_FINAL).length());
+
+            GzipStarter gzipStarter = new GzipStarter();
+            CompressionResult resultGzip = gzipStarter.compress(FILE_FINAL, "bla.gzp", true);
+            runTimeGzip+=resultGzip.getCompressionTime();
 
 
-//        System.out.println("hdt normal: " + ratioHDTNormal);
-//        System.out.println("hdt improved: " + ratioHDTImproved);
-//        System.out.println("grp normal: " + sizeGRPNormal);
-//        System.out.println("GRP ont: " + sizeGRPOnt);
+            GraphRePairStarter graphRePairStarter = new GraphRePairStarter();
+            CompressionResult resultGRPNormal = graphRePairStarter.compress(FILE_FINAL, null, false);
+            double sizeGRPNormal = resultGRPNormal.getCompressedSize();
+            runTimeGRPNormal+=resultGRPNormal.getCompressionTime();
+            CompressionResult resultGRPOnt = graphRePairStarter.compress(FILE_FINAL_ONTOLOGY_MANIPULATED, null, false);
+            double sizeGRPOnt = resultGRPOnt.getCompressedSize();
+            runTimeGRPImpr+=resultGRPOnt.getCompressionTime();
+
+
+//            System.out.println("hdt normal: " + ratioHDTNormal);
+//            System.out.println("hdt improved: " + ratioHDTImproved);
+//            System.out.println("grp normal: " + sizeGRPNormal);
+//            System.out.println("GRP ont: " + sizeGRPOnt);
+
+            System.out.print("\n\n\n iteration" + i + "\n\n\n");
+        }
+
+        System.out.println("\n\n runtimes:\n");
+
+        System.out.println("HDT Normal: "+runTimeHDTNormal*1.0/numExecutions);
+        System.out.println("HDT Impr: "+runTimeHDTImpr*1.0/numExecutions);
+
+        System.out.println("GRP Normal: "+runTimeGRPNormal*1.0/numExecutions);
+        System.out.println("GRP Ont: "+runTimeGRPImpr*1.0/numExecutions);
+        System.out.println("Gzip "+runTimeGzip*1.0/numExecutions);
+
     }
 
     private static void evaluateDictCompressions() {

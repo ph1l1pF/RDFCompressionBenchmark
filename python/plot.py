@@ -23,23 +23,28 @@ listsHDT= readLinesFromFile("/Users/philipfrerk/IdeaProjects/RDFCompressionBench
 # GRP
 listsGRP= readLinesFromFile("/Users/philipfrerk/IdeaProjects/RDFCompressionBenchmark/starPatternResultsGRP.txt")
 
-colors = ['b','g','r','c','m','k']
+#colors = ['b','g','r','c','m','k']
+styles = [':','--' ,'v','^','+','<','1','2']
 
 fig, ax = plt.subplots()
-indexHDTGetsBetter = 2
+indexHDTGetsBetter = 3
 for i in range(listsGRP.__len__()):
     dashParam = ''
-    legendGRP = 'GRP'
-    legendHDT = 'HDT'
+    legendGRP = ''
+    legendHDT = ''
     if i > 0:
         legendGRP=''
         legendHDT=''
     if i == indexHDTGetsBetter:
-        dashParam = '--'
-    ax.plot(listsHDT[i], dashParam, color = colors[i],
-                label='')
-    ax.plot(listsGRP[i], dashParam, color = colors[i],
-                label='')
+        dashParam = ''
+        legendGRP='GRP'
+        legendHDT='HDT'
+    else:
+        dashParam = styles[i]
+    ax.plot(listsHDT[i], dashParam, color = 'skyblue',
+                label=legendHDT)
+    ax.plot(listsGRP[i], dashParam, color = 'indianred',
+                label=legendGRP)
     
     
 plt.legend()

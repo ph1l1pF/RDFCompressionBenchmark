@@ -186,7 +186,7 @@ public class StarGraphEvaluator {
         int maxPredicateValue = -1;
         int i = 0;
         int indexHDTGetsBetter = -1;
-        for (int predicates = 1; predicates <= 1; predicates += 15) {
+        for (int predicates = 1; predicates <= 40; predicates +=  10) {
 
             EvalResult result = evaluateStarGraphs(predicates);
             evalResults.add(result);
@@ -236,7 +236,6 @@ public class StarGraphEvaluator {
     }
 
     public static void main(String[] args) throws IOException {
-
-        evalDecompression();
+    evalCompression();
     }
 }
